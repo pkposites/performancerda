@@ -272,7 +272,16 @@
       <div class="list-card">
         <div class="list-head">
           <h3>Carteira de clientes</h3>
-          <span>Toque em um cliente para ver o detalhamento</span>
+          <span>Toque em um cliente para ver o detalhamento · ordenado por score de saúde (pior primeiro)</span>
+          <div style="display:flex;gap:8px;margin-top:10px;">
+            <input type="text" id="searchInput" placeholder="Buscar cliente..." style="flex:1;min-width:0;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:13px;background:var(--bg-soft);color:var(--text);">
+            <select id="sortSelect" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:12.5px;background:var(--bg-soft);color:var(--text);">
+              <option value="healthAsc">Saúde: pior primeiro</option>
+              <option value="healthDesc">Saúde: melhor primeiro</option>
+              <option value="meta">Meta Score</option>
+              <option value="name">Ordem alfabética</option>
+            </select>
+          </div>
         </div>
         <div class="rows" id="rows"></div>
       </div>
@@ -331,12 +340,16 @@ const ICON = {
 // ------------------------------------------------------------------
 // DADOS — extraídos da planilha de acompanhamento (RDA / Pra Cima Company)
 // ------------------------------------------------------------------
-const HEALTH = {
-  bom:        {label:'Bom',              color:'var(--green)', bg:'var(--green-bg)'},
-  medioBom:   {label:'Médio para bom',   color:'var(--teal)',  bg:'var(--teal-bg)'},
-  medio:      {label:'Médio',            color:'var(--amber)', bg:'var(--amber-bg)'},
-  medioRuim:  {label:'Médio para ruim',  color:'var(--red)',   bg:'var(--red-bg)'},
-};
+// Faixas de saúde comercial — calculadas por computeHealthScore(), não mais
+// digitadas à mão por cliente. O rótulo "health" antigo virou apenas a saída
+// desse cálculo, mapeada num intervalo de 0 a 100.
+const HEALTH_TIERS = [
+  {min:80, key:'bom',       label:'Bom',              color:'var(--green)', bg:'var(--green-bg)'},
+  {min:60, key:'medioBom',  label:'Médio para bom',   color:'var(--teal)',  bg:'var(--teal-bg)'},
+  {min:40, key:'medio',     label:'Médio',            color:'var(--amber)', bg:'var(--amber-bg)'},
+  {min:-Infinity, key:'medioRuim', label:'Médio para ruim', color:'var(--red)', bg:'var(--red-bg)'},
+];
+function healthTier(score){ return HEALTH_TIERS.find(t=>score>=t.min); }
 const PRESENCE = {
   presente:  {label:'Presente',  color:'var(--green)', bg:'var(--green-bg)'},
   parcial:   {label:'Parcial',   color:'var(--teal)',  bg:'var(--teal-bg)'},
@@ -349,7 +362,7 @@ const PRESENCE = {
 // oficial de cada conta (0-100, escala da própria Meta — mede alinhamento com
 // boas práticas da plataforma, não é o "score de saúde" da conta com a agência).
 const CLIENTS = [
-  {name:'RedeBr', health:'medioRuim', presence:'ausente',
+  {name:'RedeBr', presence:'ausente',
     presenceNote:'Não! Tem estado bem afastado ultimamente',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
     metrics:[{label:'Visitas ao perfil', jun:3448, jul:3496},{label:'Mensagens', jun:728, jul:696}],
@@ -358,7 +371,7 @@ const CLIENTS = [
     proximo:'Agendar contato direto essa semana e apresentar um relatório claro de resultados para reengajar.',
     meta:{accountId:'1660608817357420', accountName:'CA - Duque de Caxias', business:'RedeBr Telecom', score:88, topRec:'Ativar aprimoramentos criativos automáticos', lift:5}},
 
-  {name:'Parattus', health:'medioRuim', presence:'presente',
+  {name:'Parattus', presence:'presente',
     presenceNote:'É presente, mas muito confusa e arisca',
     invest:'R$ 600 Google + R$ 1.300 Meta (média mensal)',
     metrics:[{label:'Leads', jun:3, jul:26},{label:'Mensagens', jun:47, jul:46}],
@@ -367,7 +380,7 @@ const CLIENTS = [
     proximo:'Alinhar um canal único de comunicação e reforçar clareza nos próximos relatórios.',
     meta:{accountId:'316109376955640', accountName:'CA - ANUNCIOS PARATTUS', business:'Parattus Arquitetura', score:84, topRec:'Aumentar orçamento — conjuntos estão limitados', lift:6}},
 
-  {name:'Mega mais', health:'medioBom', presence:'parcial',
+  {name:'Mega mais', presence:'parcial',
     presenceNote:'Presente, mas um pouco distante nos últimos 15 dias',
     invest:'R$ 6.000 Meta (não anuncia no Google)',
     metrics:[{label:'Visitas ao perfil', jun:4662, jul:1658},{label:'Mensagens', jun:166, jul:213}],
@@ -376,7 +389,7 @@ const CLIENTS = [
     proximo:'Propor captura conjunta de dados de fechamento para provar o ROI do investimento alto.',
     meta:{accountId:'1005447634842069', accountName:'CA - Mega Mais', business:'Mega Proteção Veicular', score:79, topRec:'Aumentar orçamento — conjuntos estão limitados', lift:12}},
 
-  {name:'Vamos Festas', health:'medioBom', presence:'parcial',
+  {name:'Vamos Festas', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[{label:'Mensagens', jun:166, jul:236}],
@@ -385,7 +398,7 @@ const CLIENTS = [
     proximo:'Propor Google Ads na próxima reunião e formalizar o acompanhamento de fechamentos.',
     meta:{accountId:'1755638351664021', accountName:'CONTA DE ANUNCIO ESPAÇO VAMOS', business:'Espaço Vamos - Festas e Eventos', score:91, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:5}},
 
-  {name:'Auditório', health:'medioBom', presence:'parcial',
+  {name:'Auditório', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[{label:'Mensagens', jun:71, jul:59}],
@@ -394,7 +407,7 @@ const CLIENTS = [
     proximo:'Investigar a queda de mensagens e propor Google Ads + uma nova oferta.',
     meta:{accountId:'387692584324747', accountName:'CA - Auditório', business:'Auditorio Edite da Rocha Farias', score:97, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:1}},
 
-  {name:'RR ON Auto', health:'medioBom', presence:'parcial',
+  {name:'RR ON Auto', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.500 Meta (não anuncia no Google)',
     metrics:[{label:'Mensagens', jun:545, jul:540}],
@@ -403,7 +416,7 @@ const CLIENTS = [
     proximo:'Propor teste de Google Ads para diversificar o canal.',
     meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:93, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:4}},
 
-  {name:'Plasart', health:'medioBom', presence:'parcial',
+  {name:'Plasart', presence:'parcial',
     presenceNote:'Presente na medida do possível',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[{label:'Visitas ao perfil', jun:2132, jul:2993}],
@@ -413,7 +426,7 @@ const CLIENTS = [
     proximo:'Focar o próximo ciclo em crescimento de seguidores e novos clientes no Instagram.',
     meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:100, topRec:null, lift:0}},
 
-  {name:'RioSul Tradição', health:'medioBom', presence:'retomando',
+  {name:'RioSul Tradição', presence:'retomando',
     presenceNote:'Retomando agora',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[],
@@ -421,7 +434,7 @@ const CLIENTS = [
     proximo:'Retomar contato e realinhar objetivos de campanha na volta.',
     meta:{accountId:'1523636822159189', accountName:'CA - Rio Sul Tradição', business:'Rio Sul', score:100, topRec:null, lift:0}},
 
-  {name:'Romanella', health:'medioBom', presence:'retomando',
+  {name:'Romanella', presence:'retomando',
     presenceNote:'Retomando agora',
     invest:'R$ 800 Meta (não anuncia no Google)',
     metrics:[],
@@ -429,7 +442,7 @@ const CLIENTS = [
     proximo:'Retomar contato e realinhar objetivos de campanha na volta.',
     meta:{accountId:null, notFound:'Conta não localizada automaticamente entre as contas do Meta acessíveis — confirmar nome exato com o cliente.'}},
 
-  {name:'Abuse', health:'medio', presence:'ausente',
+  {name:'Abuse', presence:'ausente',
     presenceNote:'Ausente, não trouxe mais criativos',
     invest:'R$ 660 Meta (não anuncia no Google)',
     metrics:[{label:'Mensagens', jun:225, jul:211}],
@@ -438,7 +451,7 @@ const CLIENTS = [
     proximo:'Cobrar novos criativos e agendar uma reunião de reengajamento.',
     meta:{accountId:'601941406565612', accountName:'CA 02 - Abuse Original', business:null, score:null, notFound:'Conta localizada, mas o Ads MCP ainda não foi liberado pela Meta para esta conta especificamente — score indisponível por ora.'}},
 
-  {name:'We Pink Caxias', health:'medio', presence:'distante',
+  {name:'We Pink Caxias', presence:'distante',
     presenceNote:'Já foi mais presente; ultimamente tem estado distante',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[{label:'Alcance', jun:170616, jul:62710},{label:'Visitas ao perfil', jun:628, jul:155}],
@@ -447,7 +460,7 @@ const CLIENTS = [
     proximo:'Implementar uma ação de conversão (oferta) e investigar a queda de alcance.',
     meta:{accountId:'1210611650712369', accountName:'CA - WePink Caxias Shopping', business:'BM We Pink', score:78, topRec:'Consolidar conjuntos de anúncios semelhantes', lift:18}},
 
-  {name:'We Pink Americas', health:'medio', presence:'distante',
+  {name:'We Pink Americas', presence:'distante',
     presenceNote:'Já foi mais presente; ultimamente tem estado distante',
     invest:'Orçamento dividido com a outra unidade',
     metrics:[],
@@ -455,7 +468,7 @@ const CLIENTS = [
     proximo:'Reengajar o cliente e reativar o reporte de resultados.',
     meta:{accountId:null, notFound:'Não há conta própria localizada — o orçamento é dividido com We Pink Caxias, dentro do mesmo Business Manager (BM We Pink).'}},
 
-  {name:'Sal da terra', health:'bom', presence:'presente',
+  {name:'Sal da terra', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 1.200 Meta (não anuncia no Google)',
     metrics:[{label:'Visitas ao perfil', jun:2529, jul:2327},{label:'Mensagens', jun:258, jul:265},{label:'Leads (LP grupo)', jun:288, jul:265}],
@@ -464,7 +477,7 @@ const CLIENTS = [
     proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente.',
     meta:{accountId:'4161983374048532', accountName:'Sal da Terra CA', business:'Sal Da Terra Sal Da Terra', score:94, topRec:'Otimizar para visualização de página de destino', lift:2}},
 
-  {name:'Barra 2', health:'bom', presence:'presente',
+  {name:'Barra 2', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[{label:'Mensagens', jun:252, jul:195}],
@@ -474,7 +487,7 @@ const CLIENTS = [
     meta:{accountId:'1515195049412961', accountName:'Grupo Barra 2', business:'Barra 2 Veículos', score:100, topRec:null, lift:0,
       ambiguous:'Foram encontradas outras contas com nome parecido ("Barra 2 Veículos Oficial", "Barra dois (pessoal)") — confirmar qual é a ativa antes da reunião.'}},
 
-  {name:'Horto', health:'bom', presence:'presente',
+  {name:'Horto', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 700 Meta + R$ 650 Google',
     metrics:[],
@@ -484,6 +497,51 @@ const CLIENTS = [
     proximo:'Formalizar a captura de retorno em vendas para documentar o case oficial.',
     meta:{accountId:'1138519810136500', accountName:'Horto Grande Rio', business:'Horto Grande Rio', score:98, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:1}},
 ];
+
+// ------------------------------------------------------------------
+// SCORE DE SAÚDE COMERCIAL — calculado, não mais digitado à mão.
+// Mede o relacionamento/risco comercial da conta com a agência (0-100),
+// diferente do Meta Opportunity Score (que mede boas práticas na plataforma).
+// Critérios, com peso decrescente de impacto:
+//   1) Presença do cliente no relacionamento (peso maior)
+//   2) Existência de gargalo aberto e não resolvido
+//   3) Tendência das métricas reportadas (jun → jul)
+//   4) Ausência de qualquer dado de resultado no período
+// ------------------------------------------------------------------
+const PRESENCE_PENALTY = {
+  presente: 0, parcial: -10, distante: -22, ausente: -38, retomando: -16,
+};
+
+function metricTrend(client){
+  if(!client.metrics.length) return null;
+  const deltas = client.metrics
+    .filter(m=>m.jun > 0)
+    .map(m=>((m.jul-m.jun)/m.jun)*100);
+  if(!deltas.length) return null;
+  return deltas.reduce((a,b)=>a+b,0)/deltas.length;
+}
+
+function hasSalesData(client){
+  const text = [client.note && client.note.label, client.oportunidade, client.gargalo, client.proximo]
+    .filter(Boolean).join(' ').toLowerCase();
+  return /venda|faturamento|fechamento/.test(text) && !!client.note;
+}
+
+function computeHealthScore(client){
+  let score = 100;
+  score += PRESENCE_PENALTY[client.presence] || 0;
+  if(client.gargalo) score -= 16;
+  const trend = metricTrend(client);
+  if(trend !== null){
+    if(trend <= -25) score -= 20;
+    else if(trend < 0) score -= 10;
+    else if(trend >= 15) score += 4;
+  } else if(!client.note){
+    score -= 12; // sem métrica alguma reportada no período
+  }
+  if(!hasSalesData(client)) score -= 6; // carteira quase inteira não reporta venda
+  return Math.max(5, Math.min(100, Math.round(score)));
+}
 
 const GARGALOS = [
   {t:'Falta de dado de vendas/fechamento', d:'Quase toda a carteira reporta leads e mensagens, mas não o que virou venda — o gargalo mais citado da planilha inteira.'},
@@ -498,7 +556,7 @@ const MELHORIAS = [
   {t:'Ritual de captura de fechamento comercial', d:'Mesmo que manual/WhatsApp, para provar ROI de verdade e não só volume de leads.'},
   {t:'Cadência de contato fixa', d:'Para os clientes distantes ou ausentes, cujo gargalo de comunicação já está afetando o resultado.'},
   {t:'Upsell de Google Ads', d:'Nos clientes que hoje só usam Meta, como diversificação de canal e aumento de ticket médio.'},
-  {t:'Score objetivo de saúde do cliente', d:'Substituir o texto livre "Médio/Bom/Ruim" por critérios claros de presença, gargalo aberto e tendência de resultado.'},
+  {t:'Score objetivo de saúde do cliente ✅ implementado', d:'O rótulo livre "Médio/Bom/Ruim" foi substituído por um cálculo automático (presença, gargalo aberto, tendência jun→jul e dado de venda) — visível em cada card de cliente.'},
 ];
 
 const PRODUTOS = [
@@ -511,8 +569,6 @@ const PRODUTOS = [
 // ------------------------------------------------------------------
 // RENDER
 // ------------------------------------------------------------------
-let selectedIdx = 0;
-
 function fmtNum(n){ return n.toLocaleString('pt-BR'); }
 
 function computeDelta(jun, jul){
@@ -538,13 +594,19 @@ function agencyScore(){
   return Math.round(sum/scored.length);
 }
 
+function avgHealthScore(){
+  const scores = CLIENTS.map(computeHealthScore);
+  return Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+}
+
 function statStrip(){
   const total = CLIENTS.length;
   const retomando = CLIENTS.filter(c=>c.presence==='retomando').length;
   const comGargalo = CLIENTS.filter(c=>c.gargalo).length;
-  const soMeta = CLIENTS.filter(c=>!c.invest.toLowerCase().includes('google')).length;
+  const semVenda = CLIENTS.filter(c=>!hasSalesData(c)).length;
   const score = agencyScore();
   const scored = scoredClients();
+  const healthAvg = avgHealthScore();
   const el = document.getElementById('statStrip');
 
   const agencyCard = score===null ? '' : `
@@ -557,36 +619,74 @@ function statStrip(){
         <text x="32" y="38" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="20" fill="#fff">${score}</text>
       </svg>
       <div class="txt">
-        <h3>Score geral da agência (Meta Opportunity Score)</h3>
-        <p>Média entre ${scored.length} contas conectadas via Meta Ads — mede alinhamento com as boas práticas da própria Meta, não a saúde comercial da conta.</p>
+        <h3>Meta Opportunity Score da carteira</h3>
+        <p>Média entre ${scored.length} contas conectadas via Meta Ads — mede alinhamento com boas práticas da própria plataforma, <strong>não</strong> a saúde comercial da conta com a agência (isso é o score de saúde abaixo).</p>
+      </div>
+    </div>
+    <div class="agency-score-card" style="background:linear-gradient(135deg,${scoreColor(healthAvg).bg} 0%, ${scoreColor(healthAvg).main} 100%);">
+      <svg class="ring" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="7"/>
+        <circle cx="32" cy="32" r="27" fill="none" stroke="#fff" stroke-width="7"
+          stroke-linecap="round" stroke-dasharray="${2*Math.PI*27}"
+          stroke-dashoffset="${2*Math.PI*27*(1-healthAvg/100)}" transform="rotate(-90 32 32)"/>
+        <text x="32" y="38" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="20" fill="#fff">${healthAvg}</text>
+      </svg>
+      <div class="txt">
+        <h3>Score médio de saúde comercial da carteira</h3>
+        <p>Calculado a partir de presença, gargalo aberto, tendência de resultado e dado de venda — quanto mais baixo, maior a atenção que a conta pede na reunião.</p>
       </div>
     </div>`;
 
   el.innerHTML = `
-    ${agencyCard}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">${agencyCard}</div>
     <div class="stat-strip">
       <div class="stat-chip"><div class="n num">${total}</div><div class="l">Clientes na carteira</div></div>
       <div class="stat-chip"><div class="n num">${comGargalo}</div><div class="l">Com gargalo mapeado</div></div>
       <div class="stat-chip"><div class="n num">${retomando}</div><div class="l">Sem atividade no período (retomando)</div></div>
-      <div class="stat-chip"><div class="n num">${soMeta}</div><div class="l">Anunciam somente no Meta</div></div>
+      <div class="stat-chip"><div class="n num">${semVenda}</div><div class="l">Sem dado de venda/fechamento</div></div>
     </div>
   `;
 }
 
+let selectedName = CLIENTS[0].name;
+let sortMode = 'healthAsc';
+let searchTerm = '';
+
+function getSelectedClient(){ return CLIENTS.find(c=>c.name===selectedName) || CLIENTS[0]; }
+
+function sortedFilteredClients(){
+  let list = CLIENTS.filter(c=>c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  const byHealth = (a,b)=>computeHealthScore(a)-computeHealthScore(b);
+  if(sortMode==='healthAsc') list = list.slice().sort(byHealth);
+  else if(sortMode==='healthDesc') list = list.slice().sort((a,b)=>-byHealth(a,b));
+  else if(sortMode==='meta'){
+    list = list.slice().sort((a,b)=>{
+      const av = (a.meta && typeof a.meta.score==='number') ? a.meta.score : -1;
+      const bv = (b.meta && typeof b.meta.score==='number') ? b.meta.score : -1;
+      return av-bv;
+    });
+  } else list = list.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+  return list;
+}
+
 function renderRows(){
   const wrap = document.getElementById('rows');
-  wrap.innerHTML = CLIENTS.map((c,i)=>{
-    const h = HEALTH[c.health];
+  const list = sortedFilteredClients();
+  if(!list.length){
+    wrap.innerHTML = `<div style="padding:24px 18px;color:var(--text-faint);font-size:13px;">Nenhum cliente encontrado para "${searchTerm}".</div>`;
+    return;
+  }
+  wrap.innerHTML = list.map(c=>{
+    const healthScore = computeHealthScore(c);
+    const h = healthTier(healthScore);
     const p = PRESENCE[c.presence];
     const mainMetric = c.metrics[0];
     const metricSummary = mainMetric
       ? `${mainMetric.label}: ${fmtNum(mainMetric.jul)}`
       : (c.note ? c.note.text : 'Sem atividade');
-    const scoreBadge = (c.meta && typeof c.meta.score === 'number')
-      ? `<span class="presence-tag" style="color:${scoreColor(c.meta.score).main};background:${scoreColor(c.meta.score).main}14;">${c.meta.score}</span>`
-      : `<span class="presence-tag" style="color:var(--text-faint);background:var(--bg-soft);">—</span>`;
+    const scoreBadge = `<span class="presence-tag" style="color:${h.color};background:${h.bg}" title="Score de saúde comercial">${healthScore}</span>`;
     return `
-      <div class="row ${i===selectedIdx?'selected':''}" data-idx="${i}">
+      <div class="row ${c.name===selectedName?'selected':''}" data-name="${c.name}">
         <div class="row-name">
           <span class="dot" style="background:${h.color}"></span>
           <b>${c.name}</b>
@@ -600,7 +700,7 @@ function renderRows(){
     `;
   }).join('');
   wrap.querySelectorAll('.row').forEach(r=>{
-    r.addEventListener('click', ()=>{ selectedIdx = parseInt(r.dataset.idx,10); renderRows(); renderDetail(); });
+    r.addEventListener('click', ()=>{ selectedName = r.dataset.name; renderRows(); renderDetail(); });
   });
 }
 
@@ -654,10 +754,12 @@ function renderMetaCard(meta){
 }
 
 function renderDetail(){
-  const c = CLIENTS[selectedIdx];
-  const h = HEALTH[c.health];
+  const c = getSelectedClient();
+  const healthScore = computeHealthScore(c);
+  const h = healthTier(healthScore);
   const p = PRESENCE[c.presence];
   const el = document.getElementById('detail');
+  const semVenda = !hasSalesData(c);
 
   const metricsHtml = c.metrics.length
     ? `<div class="metric-grid">${c.metrics.map(metricCard).join('')}</div>`
@@ -679,7 +781,8 @@ function renderDetail(){
     <div class="detail-head">
       <div>
         <h2>${c.name}</h2>
-        <span class="health-pill" style="color:${h.color};background:${h.bg}">${h.label}</span>
+        <span class="health-pill" style="color:${h.color};background:${h.bg}">${h.label} · Score ${healthScore}</span>
+        ${semVenda ? `<span class="health-pill" style="color:var(--amber);background:var(--amber-bg);margin-left:6px;">Sem dado de venda</span>` : ''}
         <div class="invest-line"><strong>Investimento:</strong> ${c.invest}</div>
       </div>
       <span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span>
@@ -773,10 +876,13 @@ document.getElementById('tabs').addEventListener('click', e=>{
 });
 document.getElementById('prevBtn').addEventListener('click', ()=>{ if(viewIdx>0) setView(VIEWS[viewIdx-1]); });
 document.getElementById('nextBtn').addEventListener('click', ()=>{ if(viewIdx<VIEWS.length-1) setView(VIEWS[viewIdx+1]); });
+document.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; renderRows(); });
+document.getElementById('sortSelect').addEventListener('change', e=>{ sortMode = e.target.value; renderRows(); });
 
 // ------------------------------------------------------------------
 // INIT
 // ------------------------------------------------------------------
+selectedName = sortedFilteredClients()[0].name;
 statStrip();
 renderRows();
 renderDetail();

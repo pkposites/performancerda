@@ -158,6 +158,19 @@
   .next-step .eyebrow{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--green);margin-bottom:7px;}
   .next-step p{margin:0;font-size:13.5px;line-height:1.5;color:#0f3d24;font-weight:500;}
 
+  /* ---------- Notas de reunião ---------- */
+  .notes-card{border:1px solid var(--border);border-radius:var(--radius-md);padding:15px 16px;margin-top:16px;background:#fbfcfe;}
+  .notes-card .eyebrow{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;}
+  .note-entry{border-left:2px solid var(--violet);padding:2px 0 2px 10px;margin-bottom:10px;}
+  .note-entry .note-date{font-size:11px;font-weight:700;color:var(--violet);}
+  .note-entry .note-text{font-size:13px;color:var(--text);line-height:1.5;margin-top:2px;white-space:pre-wrap;}
+  .note-empty{font-size:12.5px;color:var(--text-faint);font-style:italic;margin-bottom:10px;}
+  .note-form{display:flex;gap:8px;margin-top:8px;align-items:flex-end;flex-wrap:wrap;}
+  .note-form textarea{flex:1;min-width:180px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:13px;background:#fff;color:var(--text);resize:vertical;min-height:52px;}
+  .note-form button{border:none;background:var(--violet);color:#fff;border-radius:8px;padding:9px 14px;font-family:'Inter',sans-serif;font-weight:700;font-size:12.5px;cursor:pointer;white-space:nowrap;}
+  .note-form button:hover{filter:brightness(1.05);}
+  .note-hint{font-size:11px;color:var(--text-faint);margin-top:6px;}
+
   /* ---------- Meta score card ---------- */
   .meta-card{
     border:1px solid var(--border);border-radius:var(--radius-md);padding:15px 16px;margin-bottom:14px;
@@ -276,7 +289,10 @@
         <button class="tab-btn period-pill" data-period="30" style="border:1px solid var(--border);">30 dias</button>
       </div>
     </div>
-    <button id="requestUpdateBtn" class="nav-btn" style="background:var(--text);color:#fff;">🔄 Solicitar atualização de dados</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <button id="generateAgendaBtn" class="nav-btn" style="background:var(--violet);color:#fff;">📋 Gerar pauta da próxima reunião</button>
+      <button id="requestUpdateBtn" class="nav-btn" style="background:var(--text);color:#fff;">🔄 Solicitar atualização de dados</button>
+    </div>
   </div>
 
   <!-- CLIENTES -->
@@ -829,6 +845,51 @@ function renderMetaCard(meta){
     </div>`;
 }
 
+// ------------------------------------------------------------------
+// NOTAS DE REUNIÃO — registradas pela equipe a cada ciclo, viram a
+// pauta de "combinado para o próximo período". Guardadas neste
+// navegador (localStorage); o histórico "oficial" de um cliente pode
+// vir também de client.meetingLog nos dados (preenchido por mim a
+// pedido, quando você quiser tornar uma nota permanente pra todo mundo
+// que abrir a ferramenta, não só neste navegador).
+// ------------------------------------------------------------------
+function loadLocalNotes(){
+  try{ return JSON.parse(localStorage.getItem('pcNotes') || '{}'); }
+  catch(e){ return {}; }
+}
+function saveLocalNotes(obj){
+  try{ localStorage.setItem('pcNotes', JSON.stringify(obj)); }catch(e){}
+}
+function addLocalNote(clientName, text){
+  const all = loadLocalNotes();
+  if(!all[clientName]) all[clientName] = [];
+  all[clientName].push({date: new Date().toISOString().slice(0,10), text});
+  saveLocalNotes(all);
+}
+function getClientNotes(client){
+  const local = loadLocalNotes()[client.name] || [];
+  const base = client.meetingLog || [];
+  return [...base, ...local].sort((a,b)=> b.date.localeCompare(a.date));
+}
+
+function notesCardHtml(c){
+  const notes = getClientNotes(c);
+  const listHtml = notes.length
+    ? notes.map(n=>`<div class="note-entry"><div class="note-date">${n.date}</div><div class="note-text">${n.text}</div></div>`).join('')
+    : `<div class="note-empty">Nenhuma nota registrada ainda para este cliente.</div>`;
+  return `
+    <div class="notes-card">
+      <div class="eyebrow">${ICON.users} Notas de reunião com a equipe</div>
+      ${listHtml}
+      <div class="note-form">
+        <textarea id="noteInput" placeholder="O que foi falado sobre ${c.name} na reunião? Isso vira pauta pro próximo período."></textarea>
+        <button id="addNoteBtn">+ Adicionar nota</button>
+      </div>
+      <div class="note-hint">Salvo neste navegador. Pra virar histórico oficial (visível em qualquer navegador), use "Gerar pauta" e cole a mensagem aqui no chat comigo.</div>
+    </div>
+  `;
+}
+
 function renderDetail(){
   const c = getSelectedClient();
   const term = computeThermometer(c);
@@ -893,7 +954,19 @@ function renderDetail(){
       <div class="eyebrow">${ICON.flag} Próximo passo</div>
       <p>${c.proximo}</p>
     </div>
+
+    ${notesCardHtml(c)}
   `;
+
+  const addBtn = document.getElementById('addNoteBtn');
+  if(addBtn) addBtn.addEventListener('click', ()=>{
+    const ta = document.getElementById('noteInput');
+    const text = ta.value.trim();
+    if(!text) return;
+    addLocalNote(c.name, text);
+    ta.value = '';
+    renderDetail();
+  });
 }
 
 function renderMetaInsight(){
@@ -985,9 +1058,7 @@ function buildUpdateRequestText(){
   ].join('\n');
 }
 
-document.getElementById('requestUpdateBtn').addEventListener('click', async ()=>{
-  const text = buildUpdateRequestText();
-  const btn = document.getElementById('requestUpdateBtn');
+async function copyTextViaButton(text, btn){
   const original = btn.textContent;
   try{
     if(navigator.clipboard && window.isSecureContext){
@@ -1004,6 +1075,32 @@ document.getElementById('requestUpdateBtn').addEventListener('click', async ()=>
     btn.textContent = '⚠️ Não deu pra copiar — tenta de novo';
   }
   setTimeout(()=>{ btn.textContent = original; }, 3500);
+}
+
+document.getElementById('requestUpdateBtn').addEventListener('click', function(){
+  copyTextViaButton(buildUpdateRequestText(), this);
+});
+
+// Pauta do próximo período: junta o "próximo passo" combinado de cada
+// cliente com as notas de reunião registradas neste navegador — tudo
+// automático a partir dos dados já preenchidos, sem digitar de novo.
+function buildAgendaText(){
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  const linhas = CLIENTS.map(c=>{
+    const notes = getClientNotes(c);
+    const ultimaNota = notes.length ? `\n  Última nota (${notes[0].date}): ${notes[0].text}` : '';
+    return `• ${c.name}\n  Combinado: ${c.proximo}${ultimaNota}`;
+  }).join('\n\n');
+  return [
+    `Pauta da próxima reunião — Termômetro Pra Cima`,
+    `Gerada em: ${hoje}`,
+    ``,
+    linhas,
+  ].join('\n');
+}
+
+document.getElementById('generateAgendaBtn').addEventListener('click', function(){
+  copyTextViaButton(buildAgendaText(), this);
 });
 
 // ------------------------------------------------------------------

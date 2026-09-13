@@ -254,7 +254,7 @@
       <div class="brand-mark">PC</div>
       <div class="brand-text">
         <h1>Apresentação de Performance</h1>
-        <p>Pra Cima Company · carteira RDA · Junho → Julho 2026</p>
+        <p>Pra Cima Company · carteira RDA · Agosto → Setembro 2026</p>
       </div>
     </div>
     <div class="tabs" id="tabs">
@@ -316,7 +316,7 @@
   </section>
 
   <div class="footer-bar">
-    <div class="left">Dados de Junho–Julho/2026 · RDA / Pra Cima Company</div>
+    <div class="left">Dados de Agosto–Setembro/2026 (mesmo período de referência anterior — atualizaremos em breve) · RDA / Pra Cima Company</div>
     <div class="nav-arrows">
       <button class="nav-btn" id="prevBtn">← Anterior</button>
       <button class="nav-btn" id="nextBtn">Próximo →</button>
@@ -490,6 +490,19 @@ const CLIENTS = [
     oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
     proximo:'Formalizar a captura de retorno em vendas para documentar o case oficial.',
     meta:{accountId:'1138519810136500', accountName:'Horto Grande Rio', business:'Horto Grande Rio', score:87, topRec:'Aumentar orçamento — campanhas estão limitadas', lift:9}},
+
+  {name:'Igor Gringo', presence:'retomando',
+    presenceNote:'Cliente novo na carteira — ainda sem leitura de relação/presença, aguardando primeira reunião de alinhamento.',
+    invest:'~R$ 4.000 Meta/mês (não anuncia no Google)',
+    metrics:[
+      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:4621, cost:0.31},
+      {label:'Engajamento com posts (Meta Ads)', jun:null, jul:106925, cost:0.01},
+    ],
+    gargalo:null,
+    gargaloNote:'Cliente novo — gargalo ainda não mapeado.',
+    oportunidade:'Conta com bom orçamento e forte engajamento orgânico via anúncio; hoje só reconhecimento/engajamento — espaço para evoluir para geração de mensagens/leads.',
+    proximo:'Fazer reunião de abertura, registrar presença/gargalo e definir um objetivo comercial (mensagens ou leads) além de reconhecimento.',
+    meta:{accountId:'1419457343463109', accountName:'CA - Igor Gringo [Partido]', business:'CACS', score:99, topRec:'Duplicar anúncio com criativo limitado e trocar imagem/vídeo', lift:1}},
 ];
 
 // ------------------------------------------------------------------
@@ -577,7 +590,7 @@ const MELHORIAS = [
   {t:'Ritual de captura de fechamento comercial', d:'Mesmo que manual/WhatsApp, para provar ROI de verdade e não só volume de leads.'},
   {t:'Cadência de contato fixa', d:'Para os clientes distantes ou ausentes, cujo gargalo de comunicação já está afetando o resultado.'},
   {t:'Upsell de Google Ads', d:'Nos clientes que hoje só usam Meta, como diversificação de canal e aumento de ticket médio.'},
-  {t:'Score objetivo de saúde do cliente ✅ implementado', d:'O rótulo livre "Médio/Bom/Ruim" foi substituído por um cálculo automático (presença, gargalo aberto, tendência jun→jul e dado de venda) — visível em cada card de cliente.'},
+  {t:'Score objetivo de saúde do cliente ✅ implementado', d:'O rótulo livre "Médio/Bom/Ruim" foi substituído por um cálculo automático (presença, gargalo aberto, tendência ago→set e dado de venda) — visível em cada card de cliente.'},
 ];
 
 const PRODUTOS = [
@@ -732,7 +745,7 @@ function metricCard(m){
   const deltaTxt = d.pct===null ? '' : `<span class="delta ${d.dir}">${arrow} ${Math.abs(d.pct)}%</span>`;
   const costTxt = (typeof m.cost === 'number') ? `<span style="color:var(--text-faint);">· custo/resultado R$ ${m.cost.toFixed(2).replace('.',',')}</span>` : '';
   const subTxt = hasJun
-    ? `Junho: <span class="num">${fmtNum(m.jun)}</span> &nbsp;${deltaTxt} ${costTxt}`
+    ? `Agosto: <span class="num">${fmtNum(m.jun)}</span> &nbsp;${deltaTxt} ${costTxt}`
     : `Métrica nova neste ciclo ${costTxt}`;
   return `
     <div class="metric-card">

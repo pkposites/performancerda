@@ -340,9 +340,8 @@ const ICON = {
 // ------------------------------------------------------------------
 // DADOS — extraídos da planilha de acompanhamento (RDA / Pra Cima Company)
 // ------------------------------------------------------------------
-// Faixas de saúde comercial — calculadas por computeHealthScore(), não mais
-// digitadas à mão por cliente. O rótulo "health" antigo virou apenas a saída
-// desse cálculo, mapeada num intervalo de 0 a 100.
+// Faixas de cor/rótulo do Termômetro Pra Cima (computeThermometer, definido
+// mais abaixo) — não são mais digitadas à mão por cliente.
 const HEALTH_TIERS = [
   {min:80, key:'bom',       label:'Bom',              color:'var(--green)', bg:'var(--green-bg)'},
   {min:60, key:'medioBom',  label:'Médio para bom',   color:'var(--teal)',  bg:'var(--teal-bg)'},
@@ -365,7 +364,7 @@ const CLIENTS = [
   {name:'RedeBr', presence:'ausente',
     presenceNote:'Não! Tem estado bem afastado ultimamente',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
-    metrics:[{label:'Visitas ao perfil', jun:3448, jul:3496},{label:'Mensagens', jun:728, jul:696}],
+    metrics:[{label:'Visitas ao perfil', jun:3448, jul:3496},{label:'Mensagens (Meta Ads)', jun:728, jul:760, cost:4.80}],
     gargalo:'Sumiço e falta de companheirismo por parte do cliente.',
     oportunidade:'Se pudéssemos ter mais clareza do resultado, o cliente ficaria mais confortável.',
     proximo:'Agendar contato direto essa semana e apresentar um relatório claro de resultados para reengajar.',
@@ -374,7 +373,7 @@ const CLIENTS = [
   {name:'Mega Seguros', presence:'parcial',
     presenceNote:'Presente, mas um pouco distante nos últimos 15 dias',
     invest:'R$ 6.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Visitas ao perfil', jun:4662, jul:1658},{label:'Mensagens', jun:166, jul:213}],
+    metrics:[{label:'Visitas ao perfil (Meta Ads)', jun:4662, jul:1252, cost:0.30},{label:'Mensagens (Meta Ads)', jun:166, jul:222, cost:18.78}],
     gargalo:'Sem acompanhamento real do processo de vendas e faturamento.',
     oportunidade:'Investimento alto; espaço para ofertas e volume de leads para follow-up/resgate.',
     proximo:'Propor captura conjunta de dados de fechamento para provar o ROI do investimento alto.',
@@ -383,7 +382,7 @@ const CLIENTS = [
   {name:'Vamos Festas', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens', jun:166, jul:236}],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:166, jul:260, cost:3.36}],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
     proximo:'Propor Google Ads na próxima reunião e formalizar o acompanhamento de fechamentos.',
@@ -392,16 +391,16 @@ const CLIENTS = [
   {name:'Auditório', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens', jun:71, jul:59}],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:71, jul:71, cost:12.52}],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
-    proximo:'Investigar a queda de mensagens e propor Google Ads + uma nova oferta.',
+    proximo:'Investigar o custo por mensagem, que subiu bastante, e propor Google Ads + uma nova oferta.',
     meta:{accountId:'387692584324747', accountName:'CA - Auditório', business:'Auditorio Edite da Rocha Farias', score:82, topRec:'Aumentar orçamento — conjunto está limitado', lift:10}},
 
   {name:'RR ON Auto', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.500 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens', jun:545, jul:540}],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:545, jul:602, cost:2.26}],
     gargalo:null,
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
     proximo:'Propor teste de Google Ads para diversificar o canal.',
@@ -471,7 +470,11 @@ const CLIENTS = [
   {name:'Barra 2', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens', jun:252, jul:195}],
+    metrics:[
+      {label:'Mensagens (Meta Ads)', jun:252, jul:257, cost:1.55},
+      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:null, jul:2576, cost:0.14},
+      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:1493, cost:0.16},
+    ],
     gargalo:'Acompanhamento de vendas reais não acontece.',
     oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
     proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso.',
@@ -490,15 +493,22 @@ const CLIENTS = [
 ];
 
 // ------------------------------------------------------------------
-// SCORE DE SAÚDE COMERCIAL — calculado, não mais digitado à mão.
-// Mede o relacionamento/risco comercial da conta com a agência (0-100),
-// diferente do Meta Opportunity Score (que mede boas práticas na plataforma).
-// Critérios, com peso decrescente de impacto:
-//   1) Presença do cliente no relacionamento (peso maior)
-//   2) Existência de gargalo aberto e não resolvido
-//   3) Tendência das métricas reportadas (jun → jul)
-//   4) Ausência de qualquer dado de resultado no período
+// TERMÔMETRO PRA CIMA — score próprio da agência (0-100), diferente do
+// Meta Opportunity Score. Combina dois blocos que NÃO se misturam:
+//
+//   1) Score de Relação (comportamento/relacionamento) — 100% manual,
+//      inserido pelo gestor: presença do cliente, gargalo aberto e se o
+//      cliente compartilha dado de venda/fechamento.
+//   2) Score de Tráfego (campanha) — 100% automático, puxado da Meta a
+//      cada ciclo: Opportunity Score da conta + tendência do resultado
+//      de campanha reportado (mensagens, cliques, visitas — o que quer
+//      que a campanha ativa esteja otimizando).
+//
+// O peso de cada bloco é definido pelo gestor aqui em TERMOMETRO_PESOS —
+// não é uma decisão fixa da ferramenta.
 // ------------------------------------------------------------------
+const TERMOMETRO_PESOS = { relacao: 0.6, trafego: 0.4 };
+
 const PRESENCE_PENALTY = {
   presente: 0, parcial: -10, distante: -22, ausente: -38, retomando: -16,
 };
@@ -506,7 +516,7 @@ const PRESENCE_PENALTY = {
 function metricTrend(client){
   if(!client.metrics.length) return null;
   const deltas = client.metrics
-    .filter(m=>m.jun > 0)
+    .filter(m=>typeof m.jun === 'number' && m.jun > 0)
     .map(m=>((m.jul-m.jun)/m.jun)*100);
   if(!deltas.length) return null;
   return deltas.reduce((a,b)=>a+b,0)/deltas.length;
@@ -518,20 +528,40 @@ function hasSalesData(client){
   return /venda|faturamento|fechamento/.test(text) && !!client.note;
 }
 
-function computeHealthScore(client){
+const clamp100 = n => Math.max(5, Math.min(100, Math.round(n)));
+
+// Bloco 1 — Relação/Comportamento. Só entra aqui o que o gestor observa
+// no relacionamento com o cliente, nunca dado de campanha.
+function computeRelationScore(client){
   let score = 100;
   score += PRESENCE_PENALTY[client.presence] || 0;
   if(client.gargalo) score -= 16;
+  if(!hasSalesData(client)) score -= 6; // cliente não compartilha dado de venda/fechamento
+  return clamp100(score);
+}
+
+// Bloco 2 — Tráfego/Campanha. Só entra aqui dado que vem da Meta, puxado
+// automaticamente: Opportunity Score da conta + tendência do resultado
+// que a campanha ativa está otimizando (mensagens, cliques, visitas...).
+function computeTrafficScore(client){
+  let score = (client.meta && typeof client.meta.score === 'number') ? client.meta.score : 60;
   const trend = metricTrend(client);
   if(trend !== null){
-    if(trend <= -25) score -= 20;
-    else if(trend < 0) score -= 10;
-    else if(trend >= 15) score += 4;
-  } else if(!client.note){
-    score -= 12; // sem métrica alguma reportada no período
+    if(trend >= 15) score += 8;
+    else if(trend >= 0) score += 3;
+    else if(trend > -15) score -= 8;
+    else score -= 18;
   }
-  if(!hasSalesData(client)) score -= 6; // carteira quase inteira não reporta venda
-  return Math.max(5, Math.min(100, Math.round(score)));
+  return clamp100(score);
+}
+
+function computeThermometer(client){
+  const relacao = computeRelationScore(client);
+  const trafego = computeTrafficScore(client);
+  return {
+    relacao, trafego,
+    total: clamp100(TERMOMETRO_PESOS.relacao*relacao + TERMOMETRO_PESOS.trafego*trafego),
+  };
 }
 
 const GARGALOS = [
@@ -563,7 +593,7 @@ const PRODUTOS = [
 function fmtNum(n){ return n.toLocaleString('pt-BR'); }
 
 function computeDelta(jun, jul){
-  if(jun === 0) return {pct:null, dir:'flat'};
+  if(jun === null || jun === undefined || jun === 0) return {pct:null, dir:'flat'};
   const pct = Math.round(((jul-jun)/jun)*1000)/10;
   const dir = jul>jun ? 'up' : jul<jun ? 'down' : 'flat';
   return {pct, dir};
@@ -585,8 +615,8 @@ function agencyScore(){
   return Math.round(sum/scored.length);
 }
 
-function avgHealthScore(){
-  const scores = CLIENTS.map(computeHealthScore);
+function avgThermometer(){
+  const scores = CLIENTS.map(c=>computeThermometer(c).total);
   return Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
 }
 
@@ -597,7 +627,7 @@ function statStrip(){
   const semVenda = CLIENTS.filter(c=>!hasSalesData(c)).length;
   const score = agencyScore();
   const scored = scoredClients();
-  const healthAvg = avgHealthScore();
+  const termAvg = avgThermometer();
   const el = document.getElementById('statStrip');
 
   const agencyCard = score===null ? '' : `
@@ -611,20 +641,20 @@ function statStrip(){
       </svg>
       <div class="txt">
         <h3>Meta Opportunity Score da carteira</h3>
-        <p>Média entre ${scored.length} contas conectadas via Meta Ads — mede alinhamento com boas práticas da própria plataforma, <strong>não</strong> a saúde comercial da conta com a agência (isso é o score de saúde abaixo).</p>
+        <p>Média entre ${scored.length} contas conectadas via Meta Ads — mede alinhamento com boas práticas da própria plataforma, <strong>não</strong> é o termômetro próprio da agência (ao lado).</p>
       </div>
     </div>
-    <div class="agency-score-card" style="background:linear-gradient(135deg,${scoreColor(healthAvg).bg} 0%, ${scoreColor(healthAvg).main} 100%);">
+    <div class="agency-score-card" style="background:linear-gradient(135deg,${scoreColor(termAvg).bg} 0%, ${scoreColor(termAvg).main} 100%);">
       <svg class="ring" viewBox="0 0 64 64">
         <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="7"/>
         <circle cx="32" cy="32" r="27" fill="none" stroke="#fff" stroke-width="7"
           stroke-linecap="round" stroke-dasharray="${2*Math.PI*27}"
-          stroke-dashoffset="${2*Math.PI*27*(1-healthAvg/100)}" transform="rotate(-90 32 32)"/>
-        <text x="32" y="38" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="20" fill="#fff">${healthAvg}</text>
+          stroke-dashoffset="${2*Math.PI*27*(1-termAvg/100)}" transform="rotate(-90 32 32)"/>
+        <text x="32" y="38" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="20" fill="#fff">${termAvg}</text>
       </svg>
       <div class="txt">
-        <h3>Score médio de saúde comercial da carteira</h3>
-        <p>Calculado a partir de presença, gargalo aberto, tendência de resultado e dado de venda — quanto mais baixo, maior a atenção que a conta pede na reunião.</p>
+        <h3>Termômetro Pra Cima da carteira</h3>
+        <p>Score próprio: ${Math.round(TERMOMETRO_PESOS.relacao*100)}% Relação (manual, gestor) + ${Math.round(TERMOMETRO_PESOS.trafego*100)}% Tráfego (automático, Meta) — pesos ajustáveis em TERMOMETRO_PESOS.</p>
       </div>
     </div>`;
 
@@ -647,7 +677,7 @@ function getSelectedClient(){ return CLIENTS.find(c=>c.name===selectedName) || C
 
 function sortedFilteredClients(){
   let list = CLIENTS.filter(c=>c.name.toLowerCase().includes(searchTerm.toLowerCase()));
-  const byHealth = (a,b)=>computeHealthScore(a)-computeHealthScore(b);
+  const byHealth = (a,b)=>computeThermometer(a).total-computeThermometer(b).total;
   if(sortMode==='healthAsc') list = list.slice().sort(byHealth);
   else if(sortMode==='healthDesc') list = list.slice().sort((a,b)=>-byHealth(a,b));
   else if(sortMode==='meta'){
@@ -668,14 +698,14 @@ function renderRows(){
     return;
   }
   wrap.innerHTML = list.map(c=>{
-    const healthScore = computeHealthScore(c);
-    const h = healthTier(healthScore);
+    const term = computeThermometer(c);
+    const h = healthTier(term.total);
     const p = PRESENCE[c.presence];
     const mainMetric = c.metrics[0];
     const metricSummary = mainMetric
       ? `${mainMetric.label}: ${fmtNum(mainMetric.jul)}`
       : (c.note ? c.note.text : 'Sem atividade');
-    const scoreBadge = `<span class="presence-tag" style="color:${h.color};background:${h.bg}" title="Score de saúde comercial">${healthScore}</span>`;
+    const scoreBadge = `<span class="presence-tag" style="color:${h.color};background:${h.bg}" title="Termômetro (Relação ${term.relacao} · Tráfego ${term.trafego})">${term.total}</span>`;
     return `
       <div class="row ${c.name===selectedName?'selected':''}" data-name="${c.name}">
         <div class="row-name">
@@ -696,14 +726,19 @@ function renderRows(){
 }
 
 function metricCard(m){
+  const hasJun = m.jun !== null && m.jun !== undefined;
   const d = computeDelta(m.jun, m.jul);
   const arrow = d.dir==='up' ? '▲' : d.dir==='down' ? '▼' : '—';
   const deltaTxt = d.pct===null ? '' : `<span class="delta ${d.dir}">${arrow} ${Math.abs(d.pct)}%</span>`;
+  const costTxt = (typeof m.cost === 'number') ? `<span style="color:var(--text-faint);">· custo/resultado R$ ${m.cost.toFixed(2).replace('.',',')}</span>` : '';
+  const subTxt = hasJun
+    ? `Junho: <span class="num">${fmtNum(m.jun)}</span> &nbsp;${deltaTxt} ${costTxt}`
+    : `Métrica nova neste ciclo ${costTxt}`;
   return `
     <div class="metric-card">
       <div class="eyebrow"><span class="icon-dot" style="background:var(--blue-bg);color:var(--blue);">${ICON.target}</span>${m.label}</div>
       <div class="val num">${fmtNum(m.jul)}</div>
-      <div class="sub">Junho: <span class="num">${fmtNum(m.jun)}</span> &nbsp;${deltaTxt}</div>
+      <div class="sub">${subTxt}</div>
     </div>
   `;
 }
@@ -746,8 +781,8 @@ function renderMetaCard(meta){
 
 function renderDetail(){
   const c = getSelectedClient();
-  const healthScore = computeHealthScore(c);
-  const h = healthTier(healthScore);
+  const term = computeThermometer(c);
+  const h = healthTier(term.total);
   const p = PRESENCE[c.presence];
   const el = document.getElementById('detail');
   const semVenda = !hasSalesData(c);
@@ -772,9 +807,13 @@ function renderDetail(){
     <div class="detail-head">
       <div>
         <h2>${c.name}</h2>
-        <span class="health-pill" style="color:${h.color};background:${h.bg}">${h.label} · Score ${healthScore}</span>
+        <span class="health-pill" style="color:${h.color};background:${h.bg}">${h.label} · Termômetro ${term.total}</span>
         ${semVenda ? `<span class="health-pill" style="color:var(--amber);background:var(--amber-bg);margin-left:6px;">Sem dado de venda</span>` : ''}
         <div class="invest-line"><strong>Investimento:</strong> ${c.invest}</div>
+        <div class="invest-line" style="margin-top:2px;">
+          <strong>Relação (manual):</strong> ${term.relacao} &nbsp;·&nbsp;
+          <strong>Tráfego (Meta, automático):</strong> ${term.trafego}
+        </div>
       </div>
       <span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span>
     </div>

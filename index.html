@@ -494,15 +494,13 @@ const CLIENTS = [
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:252, jul:257, cost:1.55},
-      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:null, jul:2576, cost:0.14},
-      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:1493, cost:0.16},
+      {label:'Mensagens (Meta Ads)', jun:null, jul:153, cost:15.01},
     ],
     gargalo:'Acompanhamento de vendas reais não acontece.',
     oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
-    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso.',
-    meta:{accountId:'1515195049412961', accountName:'Grupo Barra 2', business:'Barra 2 Veículos', score:100, topRec:null, lift:0,
-      ambiguous:'Foram encontradas outras contas com nome parecido ("Barra 2 Veículos Oficial", "Barra dois (pessoal)") — confirmar qual é a ativa antes da reunião.'}},
+    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso; e revisar o orçamento, que a Meta está sinalizando como limitado em quase todas as campanhas.',
+    meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:75, topRec:'Aumentar orçamento — campanhas estão limitadas', lift:20,
+      correcao:'⚠️ Conta corrigida em 13/09/2026: a conta usada antes ("Grupo Barra 2" / 1515195049412961, praticamente sem atividade real) estava errada. A conta certa é esta — 19 campanhas ativas, uma por modelo de veículo, todas otimizando para mensagens no WhatsApp.'}},
 
   {name:'Horto', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
@@ -809,6 +807,7 @@ function renderMetaCard(meta){
       ? `<div class="top-rec">Maior oportunidade da Meta: <b>${meta.topRec}</b> (+${meta.lift} pts)</div>`
       : `<div class="top-rec">Nenhuma recomendação pendente da Meta no momento.</div>`;
     const ambiguous = meta.ambiguous ? `<div class="meta-flag">⚠ ${meta.ambiguous}</div>` : '';
+    const correcao = meta.correcao ? `<div class="meta-flag" style="color:var(--green);">${meta.correcao}</div>` : '';
     return `
       <div class="meta-card">
         ${ring}
@@ -817,6 +816,7 @@ function renderMetaCard(meta){
           <div class="acc-sub">${meta.business || 'Sem Business Manager vinculado'} · ID ${meta.accountId}</div>
           ${rec}
           ${ambiguous}
+          ${correcao}
         </div>
         <a class="meta-link" href="https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${meta.accountId}" target="_blank" rel="noopener">Abrir no Meta Ads Manager →</a>
       </div>`;

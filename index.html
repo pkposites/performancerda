@@ -408,7 +408,10 @@ const CLIENTS = [
   {name:'Auditório', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:71, jul:71, cost:12.52}],
+    metrics:[
+      {label:'Mensagens (Meta Ads)', jun:71, jul:71, cost:12.52},
+      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:528, cost:0.34},
+    ],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
     proximo:'Investigar o custo por mensagem, que subiu bastante, e propor Google Ads + uma nova oferta.',
@@ -436,9 +439,12 @@ const CLIENTS = [
   {name:'RioSul Tradição', presence:'retomando',
     presenceNote:'Retomando agora',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
-    metrics:[],
+    metrics:[
+      {label:'Engajamento com posts (Meta Ads)', jun:null, jul:44258, cost:0.01},
+      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:1006, cost:0.17},
+    ],
     gargalo:null, oportunidade:null,
-    proximo:'Retomar contato e realinhar objetivos de campanha na volta.',
+    proximo:'Retomar contato e realinhar objetivos de campanha na volta — a campanha segue ativa e gerando resultado apesar da presença fraca.',
     meta:{accountId:'1523636822159189', accountName:'CA - Rio Sul Tradição', business:'Rio Sul', score:100, topRec:null, lift:0}},
 
   {name:'Romanella', presence:'retomando',
@@ -501,7 +507,7 @@ const CLIENTS = [
   {name:'Horto', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 700 Meta + R$ 650 Google',
-    metrics:[],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:null, jul:589, cost:1.49}],
     note:{label:'Faturamento em vendas', text:'Acima de R$ 100 mil em ambos os meses'},
     gargalo:'Sem controle real do retorno em vendas.',
     oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
@@ -831,11 +837,12 @@ function renderDetail(){
   const el = document.getElementById('detail');
   const semVenda = !hasSalesData(c);
 
-  const metricsHtml = c.metrics.length
-    ? `<div class="metric-grid">${c.metrics.map(metricCard).join('')}</div>`
-    : c.note
-      ? `<div class="metric-grid"><div class="metric-card"><div class="eyebrow"><span class="icon-dot" style="background:var(--green-bg);color:var(--green);">${ICON.target}</span>${c.note.label}</div><div class="val">${c.note.text}</div></div></div>`
-      : `<div class="metric-grid"><div class="metric-card"><div class="eyebrow">Resultado</div><div class="val" style="font-size:14px;color:var(--text-faint);font-weight:600;">Sem atividade registrada neste período</div></div></div>`;
+  const noteCardHtml = c.note
+    ? `<div class="metric-card"><div class="eyebrow"><span class="icon-dot" style="background:var(--green-bg);color:var(--green);">${ICON.target}</span>${c.note.label}</div><div class="val">${c.note.text}</div></div>`
+    : '';
+  const metricsHtml = (c.metrics.length || c.note)
+    ? `<div class="metric-grid">${c.metrics.map(metricCard).join('')}${noteCardHtml}</div>`
+    : `<div class="metric-grid"><div class="metric-card"><div class="eyebrow">Resultado</div><div class="val" style="font-size:14px;color:var(--text-faint);font-weight:600;">Sem atividade registrada neste período</div></div></div>`;
 
   const gargaloHtml = c.gargalo
     ? `<p>${c.gargalo}</p>`

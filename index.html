@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Performance — Pra Cima Company</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#eef1f7;
+    --bg-soft:#e6eaf3;
+    --card:#ffffff;
+    --border:rgba(31,36,55,0.07);
+    --shadow:0 6px 24px rgba(31,41,66,0.07);
+    --shadow-lift:0 10px 32px rgba(31,41,66,0.12);
+    --text:#1c2130;
+    --text-soft:#6b7185;
+    --text-faint:#9aa0b4;
+
+    --green:#159a5b;
+    --green-bg:#e5f7ec;
+    --red:#e0435c;
+    --red-bg:#fdeaee;
+    --amber:#d99a1f;
+    --amber-bg:#fdf3d9;
+    --blue:#3b73f0;
+    --blue-bg:#e9f0ff;
+    --pink:#e0559a;
+    --pink-bg:#fceaf4;
+    --teal:#1fa89a;
+    --teal-bg:#e2f6f4;
+    --violet:#7c5cd9;
+    --violet-bg:#efe9fb;
+
+    --radius-lg:20px;
+    --radius-md:14px;
+    --radius-sm:9px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+  h1,h2,h3,.display{font-family:'Manrope',sans-serif;}
+  .num{font-variant-numeric:tabular-nums;}
+
+  .app{max-width:1240px;margin:0 auto;padding:28px 24px 60px;}
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    flex-wrap:wrap;gap:16px;margin-bottom:22px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:40px;height:40px;border-radius:12px;
+    background:linear-gradient(135deg,var(--blue) 0%, var(--violet) 100%);
+    display:flex;align-items:center;justify-content:center;
+    color:#fff;font-family:'Manrope',sans-serif;font-weight:800;font-size:15px;
+    box-shadow:var(--shadow);
+    flex-shrink:0;
+  }
+  .brand-text h1{font-size:18px;margin:0;font-weight:800;letter-spacing:-0.01em;}
+  .brand-text p{margin:2px 0 0;font-size:12.5px;color:var(--text-soft);}
+
+  .tabs{display:flex;gap:6px;background:var(--card);padding:5px;border-radius:999px;box-shadow:var(--shadow);border:1px solid var(--border);}
+  .tab-btn{
+    border:none;background:transparent;padding:9px 18px;border-radius:999px;
+    font-family:'Inter',sans-serif;font-weight:600;font-size:13.5px;color:var(--text-soft);
+    cursor:pointer;transition:all .18s ease;white-space:nowrap;
+  }
+  .tab-btn.active{background:var(--text);color:#fff;box-shadow:0 3px 10px rgba(28,33,48,.18);}
+  .tab-btn:not(.active):hover{color:var(--text);background:var(--bg-soft);}
+
+  /* ---------- Stat strip ---------- */
+  .stat-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  .stat-chip{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-md);
+    padding:16px 18px;box-shadow:var(--shadow);
+  }
+  .stat-chip .n{font-size:24px;font-weight:800;font-family:'Manrope',sans-serif;}
+  .stat-chip .l{font-size:12px;color:var(--text-soft);margin-top:2px;}
+
+  /* ---------- Views ---------- */
+  .view{display:none;animation:fade .35s ease;}
+  .view.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- Clients layout ---------- */
+  .clients-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:18px;align-items:start;}
+  @media (max-width:920px){.clients-grid{grid-template-columns:1fr;} .stat-strip{grid-template-columns:repeat(2,1fr);}}
+
+  .list-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);overflow:hidden;
+  }
+  .list-head{padding:16px 18px 12px;border-bottom:1px solid var(--border);}
+  .list-head h3{margin:0;font-size:14.5px;font-weight:700;}
+  .list-head span{font-size:12px;color:var(--text-faint);}
+  .rows{max-height:640px;overflow-y:auto;}
+  .row{
+    display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;
+    padding:13px 18px;border-bottom:1px solid var(--border);cursor:pointer;
+    transition:background .15s ease;
+  }
+  .row:last-child{border-bottom:none;}
+  .row:hover{background:var(--bg-soft);}
+  .row.selected{background:var(--green-bg);}
+  .row-name{display:flex;align-items:center;gap:10px;min-width:0;}
+  .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .row-name b{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .row-meta{font-size:12px;color:var(--text-soft);text-align:right;white-space:nowrap;}
+  .presence-tag{
+    font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;white-space:nowrap;
+  }
+
+  /* ---------- Detail card ---------- */
+  .detail{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);padding:22px;min-height:520px;
+  }
+  .detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;}
+  .detail-head h2{margin:0 0 4px;font-size:20px;font-weight:800;}
+  .health-pill{font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:999px;display:inline-block;}
+  .invest-line{font-size:13px;color:var(--text-soft);margin-top:6px;}
+
+  .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
+  .metric-card{
+    border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 15px;background:#fbfcfe;
+  }
+  .metric-card .eyebrow{display:flex;align-items:center;gap:6px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);margin-bottom:8px;}
+  .metric-card .icon-dot{width:20px;height:20px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .metric-card .val{font-size:19px;font-weight:800;font-family:'Manrope',sans-serif;}
+  .metric-card .sub{font-size:11.5px;color:var(--text-soft);margin-top:3px;}
+  .delta{font-weight:700;}
+  .delta.up{color:var(--green);}
+  .delta.down{color:var(--red);}
+  .delta.flat{color:var(--text-faint);}
+
+  .info-pair{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+  @media (max-width:520px){.info-pair{grid-template-columns:1fr;}}
+  .info-card{border:1px solid var(--border);border-radius:var(--radius-md);padding:14px 15px;}
+  .info-card .eyebrow{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);margin-bottom:7px;}
+  .info-card p{margin:0;font-size:13.5px;line-height:1.5;color:var(--text);}
+  .info-card.empty p{color:var(--text-faint);font-style:italic;}
+
+  .next-step{
+    background:var(--green-bg);border:1px solid rgba(21,154,91,.18);border-radius:var(--radius-md);
+    padding:15px 16px;
+  }
+  .next-step .eyebrow{display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--green);margin-bottom:7px;}
+  .next-step p{margin:0;font-size:13.5px;line-height:1.5;color:#0f3d24;font-weight:500;}
+
+  /* ---------- Meta score card ---------- */
+  .meta-card{
+    border:1px solid var(--border);border-radius:var(--radius-md);padding:15px 16px;margin-bottom:14px;
+    display:flex;align-items:center;gap:16px;background:#fbfcfe;flex-wrap:wrap;
+  }
+  .score-ring{
+    width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+    font-family:'Manrope',sans-serif;font-weight:800;font-size:17px;color:#fff;
+  }
+  .meta-info{flex:1;min-width:180px;}
+  .meta-info .acc-name{font-size:13px;font-weight:700;}
+  .meta-info .acc-sub{font-size:11.5px;color:var(--text-soft);margin-top:1px;}
+  .meta-info .top-rec{font-size:12px;color:var(--text-soft);margin-top:6px;}
+  .meta-info .top-rec b{color:var(--text);}
+  .meta-link{
+    font-size:12px;font-weight:700;color:var(--blue);text-decoration:none;white-space:nowrap;
+    border:1px solid var(--blue-bg);background:var(--blue-bg);padding:7px 12px;border-radius:8px;
+  }
+  .meta-link:hover{filter:brightness(0.97);}
+  .meta-missing{font-size:12.5px;color:var(--text-soft);line-height:1.5;}
+  .meta-flag{font-size:11.5px;color:var(--amber);margin-top:6px;font-weight:600;}
+
+  .agency-score-card{
+    display:flex;align-items:center;gap:16px;background:linear-gradient(135deg,#1c2130 0%, #33395a 100%);
+    border-radius:var(--radius-lg);padding:18px 20px;color:#fff;box-shadow:var(--shadow-lift);margin-bottom:18px;
+  }
+  .agency-score-card .ring{width:64px;height:64px;flex-shrink:0;}
+  .agency-score-card .txt h3{margin:0 0 3px;font-size:14px;font-weight:700;color:#fff;}
+  .agency-score-card .txt p{margin:0;font-size:12.5px;color:rgba(255,255,255,.7);}
+
+  .icon-round{width:26px;height:26px;border-radius:8px;display:flex;align-items:center;justify-content:center;}
+  svg{display:block;}
+
+  /* ---------- Panorama / Produto cards ---------- */
+  .section-title{margin:6px 0 14px;font-size:15px;font-weight:800;display:flex;align-items:center;gap:9px;}
+  .section-title .icon-round{width:28px;height:28px;border-radius:9px;}
+  .card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-bottom:30px;}
+  @media (max-width:760px){.card-grid{grid-template-columns:1fr;}}
+  .insight-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);padding:18px 19px;
+  }
+  .insight-card .n{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:24px;height:24px;border-radius:7px;font-size:12px;font-weight:800;
+    background:var(--bg-soft);color:var(--text-soft);margin-bottom:10px;
+  }
+  .insight-card h4{margin:0 0 6px;font-size:14px;font-weight:700;}
+  .insight-card p{margin:0;font-size:13px;line-height:1.55;color:var(--text-soft);}
+
+  .product-card{
+    background:var(--card);border:1px solid var(--border);border-radius:var(--radius-lg);
+    box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:10px;
+  }
+  .product-card .tag{
+    align-self:flex-start;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
+    padding:4px 10px;border-radius:999px;background:var(--violet-bg);color:var(--violet);
+  }
+  .product-card h4{margin:0;font-size:15px;font-weight:800;}
+  .product-card p{margin:0;font-size:13px;line-height:1.55;color:var(--text-soft);}
+  .product-card .link{font-size:12px;font-weight:700;color:var(--blue);margin-top:2px;}
+
+  /* ---------- Footer ---------- */
+  .meta-insight-banner{
+    display:flex;align-items:flex-start;gap:14px;background:var(--card);border:1px solid var(--border);
+    border-radius:var(--radius-lg);box-shadow:var(--shadow);padding:18px 20px;margin-bottom:22px;
+  }
+  .meta-insight-banner h4{margin:0 0 5px;font-size:14px;font-weight:800;}
+  .meta-insight-banner p{margin:0;font-size:13px;line-height:1.55;color:var(--text-soft);}
+
+  .footer-bar{
+    margin-top:26px;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 4px 0;flex-wrap:wrap;gap:10px;
+  }
+  .footer-bar .left{font-size:12px;color:var(--text-faint);}
+  .nav-arrows{display:flex;gap:8px;}
+  .nav-btn{
+    border:1px solid var(--border);background:var(--card);border-radius:10px;padding:9px 16px;
+    font-family:'Inter',sans-serif;font-weight:700;font-size:13px;color:var(--text);cursor:pointer;
+    box-shadow:var(--shadow);transition:transform .15s ease;
+  }
+  .nav-btn:hover{transform:translateY(-1px);}
+  .nav-btn:disabled{opacity:.35;cursor:default;transform:none;}
+
+  ::-webkit-scrollbar{width:8px;}
+  ::-webkit-scrollbar-thumb{background:#cfd4e2;border-radius:8px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">PC</div>
+      <div class="brand-text">
+        <h1>Apresentação de Performance</h1>
+        <p>Pra Cima Company · carteira RDA · Junho → Julho 2026</p>
+      </div>
+    </div>
+    <div class="tabs" id="tabs">
+      <button class="tab-btn active" data-view="clients">Clientes</button>
+      <button class="tab-btn" data-view="panorama">Panorama Geral</button>
+      <button class="tab-btn" data-view="produto">Ideias de Produto</button>
+    </div>
+  </div>
+
+  <div id="statStrip"></div>
+
+  <!-- CLIENTES -->
+  <section class="view active" id="view-clients">
+    <div class="clients-grid">
+      <div class="list-card">
+        <div class="list-head">
+          <h3>Carteira de clientes</h3>
+          <span>Toque em um cliente para ver o detalhamento</span>
+        </div>
+        <div class="rows" id="rows"></div>
+      </div>
+      <div class="detail" id="detail"></div>
+    </div>
+  </section>
+
+  <!-- PANORAMA -->
+  <section class="view" id="view-panorama">
+    <div id="metaInsightBanner"></div>
+
+    <div class="section-title">
+      <span class="icon-round" style="background:var(--red-bg);color:var(--red);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></span>
+      Gargalos gerais da carteira
+    </div>
+    <div class="card-grid" id="gargalosGrid"></div>
+
+    <div class="section-title">
+      <span class="icon-round" style="background:var(--green-bg);color:var(--green);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.5.4.9 1 1 1.7L9.6 17h4.8l.2-1.5c.1-.7.5-1.3 1-1.7A6 6 0 0 0 12 3Z"/></svg></span>
+      Melhorias gerais propostas
+    </div>
+    <div class="card-grid" id="melhoriasGrid"></div>
+  </section>
+
+  <!-- PRODUTO -->
+  <section class="view" id="view-produto">
+    <div class="section-title">
+      <span class="icon-round" style="background:var(--violet-bg);color:var(--violet);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></span>
+      Ideias de produto para a agência
+    </div>
+    <div class="card-grid" id="produtoGrid" style="grid-template-columns:repeat(2,1fr);"></div>
+  </section>
+
+  <div class="footer-bar">
+    <div class="left">Dados de Junho–Julho/2026 · RDA / Pra Cima Company</div>
+    <div class="nav-arrows">
+      <button class="nav-btn" id="prevBtn">← Anterior</button>
+      <button class="nav-btn" id="nextBtn">Próximo →</button>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const ICON = {
+  chart: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 20V10M12 20V4M20 20v-7"/></svg>',
+  target: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>',
+  alert: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg>',
+  bulb: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.5.4.9 1 1 1.7L9.6 17h4.8l.2-1.5c.1-.7.5-1.3 1-1.7A6 6 0 0 0 12 3Z"/></svg>',
+  flag: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 21V4"/><path d="M5 4h13l-3 4.5L18 13H5"/></svg>',
+  users: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>',
+  layers: '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg>',
+  spark: '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v4M12 17v4M5 5l2.8 2.8M16.2 16.2 19 19M3 12h4M17 12h4M5 19l2.8-2.8M16.2 7.8 19 5"/></svg>',
+};
+
+// ------------------------------------------------------------------
+// DADOS — extraídos da planilha de acompanhamento (RDA / Pra Cima Company)
+// ------------------------------------------------------------------
+const HEALTH = {
+  bom:        {label:'Bom',              color:'var(--green)', bg:'var(--green-bg)'},
+  medioBom:   {label:'Médio para bom',   color:'var(--teal)',  bg:'var(--teal-bg)'},
+  medio:      {label:'Médio',            color:'var(--amber)', bg:'var(--amber-bg)'},
+  medioRuim:  {label:'Médio para ruim',  color:'var(--red)',   bg:'var(--red-bg)'},
+};
+const PRESENCE = {
+  presente:  {label:'Presente',  color:'var(--green)', bg:'var(--green-bg)'},
+  parcial:   {label:'Parcial',   color:'var(--teal)',  bg:'var(--teal-bg)'},
+  distante:  {label:'Distante',  color:'var(--amber)', bg:'var(--amber-bg)'},
+  ausente:   {label:'Ausente',   color:'var(--red)',   bg:'var(--red-bg)'},
+  retomando: {label:'Retomando', color:'var(--blue)',  bg:'var(--blue-bg)'},
+};
+
+// Contas de anúncio do Meta localizadas via MCP (Meta Ads) e Opportunity Score
+// oficial de cada conta (0-100, escala da própria Meta — mede alinhamento com
+// boas práticas da plataforma, não é o "score de saúde" da conta com a agência).
+const CLIENTS = [
+  {name:'RedeBr', health:'medioRuim', presence:'ausente',
+    presenceNote:'Não! Tem estado bem afastado ultimamente',
+    invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
+    metrics:[{label:'Visitas ao perfil', jun:3448, jul:3496},{label:'Mensagens', jun:728, jul:696}],
+    gargalo:'Sumiço e falta de companheirismo por parte do cliente.',
+    oportunidade:'Se pudéssemos ter mais clareza do resultado, o cliente ficaria mais confortável.',
+    proximo:'Agendar contato direto essa semana e apresentar um relatório claro de resultados para reengajar.',
+    meta:{accountId:'1660608817357420', accountName:'CA - Duque de Caxias', business:'RedeBr Telecom', score:88, topRec:'Ativar aprimoramentos criativos automáticos', lift:5}},
+
+  {name:'Parattus', health:'medioRuim', presence:'presente',
+    presenceNote:'É presente, mas muito confusa e arisca',
+    invest:'R$ 600 Google + R$ 1.300 Meta (média mensal)',
+    metrics:[{label:'Leads', jun:3, jul:26},{label:'Mensagens', jun:47, jul:46}],
+    gargalo:'Comunicação, falta de clareza e cooperação da cliente.',
+    oportunidade:'Tem coragem de investir e demonstra vontade de ter resultados.',
+    proximo:'Alinhar um canal único de comunicação e reforçar clareza nos próximos relatórios.',
+    meta:{accountId:'316109376955640', accountName:'CA - ANUNCIOS PARATTUS', business:'Parattus Arquitetura', score:84, topRec:'Aumentar orçamento — conjuntos estão limitados', lift:6}},
+
+  {name:'Mega mais', health:'medioBom', presence:'parcial',
+    presenceNote:'Presente, mas um pouco distante nos últimos 15 dias',
+    invest:'R$ 6.000 Meta (não anuncia no Google)',
+    metrics:[{label:'Visitas ao perfil', jun:4662, jul:1658},{label:'Mensagens', jun:166, jul:213}],
+    gargalo:'Sem acompanhamento real do processo de vendas e faturamento.',
+    oportunidade:'Investimento alto; espaço para ofertas e volume de leads para follow-up/resgate.',
+    proximo:'Propor captura conjunta de dados de fechamento para provar o ROI do investimento alto.',
+    meta:{accountId:'1005447634842069', accountName:'CA - Mega Mais', business:'Mega Proteção Veicular', score:79, topRec:'Aumentar orçamento — conjuntos estão limitados', lift:12}},
+
+  {name:'Vamos Festas', health:'medioBom', presence:'parcial',
+    presenceNote:'Presente somente nas reuniões, na hora do feedback',
+    invest:'R$ 1.000 Meta (não anuncia no Google)',
+    metrics:[{label:'Mensagens', jun:166, jul:236}],
+    gargalo:'Sem acompanhamento real do processo de fechamentos.',
+    oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
+    proximo:'Propor Google Ads na próxima reunião e formalizar o acompanhamento de fechamentos.',
+    meta:{accountId:'1755638351664021', accountName:'CONTA DE ANUNCIO ESPAÇO VAMOS', business:'Espaço Vamos - Festas e Eventos', score:91, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:5}},
+
+  {name:'Auditório', health:'medioBom', presence:'parcial',
+    presenceNote:'Presente somente nas reuniões, na hora do feedback',
+    invest:'R$ 1.000 Meta (não anuncia no Google)',
+    metrics:[{label:'Mensagens', jun:71, jul:59}],
+    gargalo:'Sem acompanhamento real do processo de fechamentos.',
+    oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
+    proximo:'Investigar a queda de mensagens e propor Google Ads + uma nova oferta.',
+    meta:{accountId:'387692584324747', accountName:'CA - Auditório', business:'Auditorio Edite da Rocha Farias', score:97, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:1}},
+
+  {name:'RR ON Auto', health:'medioBom', presence:'parcial',
+    presenceNote:'Presente somente nas reuniões, na hora do feedback',
+    invest:'R$ 1.500 Meta (não anuncia no Google)',
+    metrics:[{label:'Mensagens', jun:545, jul:540}],
+    gargalo:null,
+    oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
+    proximo:'Propor teste de Google Ads para diversificar o canal.',
+    meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:93, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:4}},
+
+  {name:'Plasart', health:'medioBom', presence:'parcial',
+    presenceNote:'Presente na medida do possível',
+    invest:'R$ 1.000 Meta (não anuncia no Google)',
+    metrics:[{label:'Visitas ao perfil', jun:2132, jul:2993}],
+    gargalo:null,
+    gargaloNote:'Não considera gargalos atualmente — só precisa estar conectado.',
+    oportunidade:'Focar em aumento de novos clientes e no crescimento do Instagram.',
+    proximo:'Focar o próximo ciclo em crescimento de seguidores e novos clientes no Instagram.',
+    meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:100, topRec:null, lift:0}},
+
+  {name:'RioSul Tradição', health:'medioBom', presence:'retomando',
+    presenceNote:'Retomando agora',
+    invest:'R$ 2.000 Meta (não anuncia no Google)',
+    metrics:[],
+    gargalo:null, oportunidade:null,
+    proximo:'Retomar contato e realinhar objetivos de campanha na volta.',
+    meta:{accountId:'1523636822159189', accountName:'CA - Rio Sul Tradição', business:'Rio Sul', score:100, topRec:null, lift:0}},
+
+  {name:'Romanella', health:'medioBom', presence:'retomando',
+    presenceNote:'Retomando agora',
+    invest:'R$ 800 Meta (não anuncia no Google)',
+    metrics:[],
+    gargalo:null, oportunidade:null,
+    proximo:'Retomar contato e realinhar objetivos de campanha na volta.',
+    meta:{accountId:null, notFound:'Conta não localizada automaticamente entre as contas do Meta acessíveis — confirmar nome exato com o cliente.'}},
+
+  {name:'Abuse', health:'medio', presence:'ausente',
+    presenceNote:'Ausente, não trouxe mais criativos',
+    invest:'R$ 660 Meta (não anuncia no Google)',
+    metrics:[{label:'Mensagens', jun:225, jul:211}],
+    gargalo:'Ausência e falta de acompanhamento/interesse no desempenho.',
+    oportunidade:'Reforçar a marca no público já impactado; entender o efeito do tráfego no faturamento.',
+    proximo:'Cobrar novos criativos e agendar uma reunião de reengajamento.',
+    meta:{accountId:'601941406565612', accountName:'CA 02 - Abuse Original', business:null, score:null, notFound:'Conta localizada, mas o Ads MCP ainda não foi liberado pela Meta para esta conta especificamente — score indisponível por ora.'}},
+
+  {name:'We Pink Caxias', health:'medio', presence:'distante',
+    presenceNote:'Já foi mais presente; ultimamente tem estado distante',
+    invest:'R$ 1.000 Meta (não anuncia no Google)',
+    metrics:[{label:'Alcance', jun:170616, jul:62710},{label:'Visitas ao perfil', jun:628, jul:155}],
+    gargalo:'Falta de possibilidade de ações de conversão.',
+    oportunidade:'Trabalhar ao máximo o posicionamento da marca e lotar os grupos.',
+    proximo:'Implementar uma ação de conversão (oferta) e investigar a queda de alcance.',
+    meta:{accountId:'1210611650712369', accountName:'CA - WePink Caxias Shopping', business:'BM We Pink', score:78, topRec:'Consolidar conjuntos de anúncios semelhantes', lift:18}},
+
+  {name:'We Pink Americas', health:'medio', presence:'distante',
+    presenceNote:'Já foi mais presente; ultimamente tem estado distante',
+    invest:'Orçamento dividido com a outra unidade',
+    metrics:[],
+    gargalo:null, oportunidade:null,
+    proximo:'Reengajar o cliente e reativar o reporte de resultados.',
+    meta:{accountId:null, notFound:'Não há conta própria localizada — o orçamento é dividido com We Pink Caxias, dentro do mesmo Business Manager (BM We Pink).'}},
+
+  {name:'Sal da terra', health:'bom', presence:'presente',
+    presenceNote:'Segue na mesma presença normal',
+    invest:'R$ 1.200 Meta (não anuncia no Google)',
+    metrics:[{label:'Visitas ao perfil', jun:2529, jul:2327},{label:'Mensagens', jun:258, jul:265},{label:'Leads (LP grupo)', jun:288, jul:265}],
+    gargalo:'Falta de acompanhamento real de desempenho de forma palpável.',
+    oportunidade:'Estar mais presente para entender esses números junto ao cliente.',
+    proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente.',
+    meta:{accountId:'4161983374048532', accountName:'Sal da Terra CA', business:'Sal Da Terra Sal Da Terra', score:94, topRec:'Otimizar para visualização de página de destino', lift:2}},
+
+  {name:'Barra 2', health:'bom', presence:'presente',
+    presenceNote:'Segue na mesma presença normal',
+    invest:'R$ 2.000 Meta (não anuncia no Google)',
+    metrics:[{label:'Mensagens', jun:252, jul:195}],
+    gargalo:'Acompanhamento de vendas reais não acontece.',
+    oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
+    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso.',
+    meta:{accountId:'1515195049412961', accountName:'Grupo Barra 2', business:'Barra 2 Veículos', score:100, topRec:null, lift:0,
+      ambiguous:'Foram encontradas outras contas com nome parecido ("Barra 2 Veículos Oficial", "Barra dois (pessoal)") — confirmar qual é a ativa antes da reunião.'}},
+
+  {name:'Horto', health:'bom', presence:'presente',
+    presenceNote:'Segue na mesma presença normal',
+    invest:'R$ 700 Meta + R$ 650 Google',
+    metrics:[],
+    note:{label:'Faturamento em vendas', text:'Acima de R$ 100 mil em ambos os meses'},
+    gargalo:'Sem controle real do retorno em vendas.',
+    oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
+    proximo:'Formalizar a captura de retorno em vendas para documentar o case oficial.',
+    meta:{accountId:'1138519810136500', accountName:'Horto Grande Rio', business:'Horto Grande Rio', score:98, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:1}},
+];
+
+const GARGALOS = [
+  {t:'Falta de dado de vendas/fechamento', d:'Quase toda a carteira reporta leads e mensagens, mas não o que virou venda — o gargalo mais citado da planilha inteira.'},
+  {t:'Baixo engajamento de parte da carteira', d:'RedeBr, Abuse e as duas contas We Pink estão afastadas ou ausentes, travando ajuste de campanha e criativo.'},
+  {t:'Falta de criativo atualizado', d:'Alguns contratos, como o da Abuse, pararam de enviar novos criativos para a operação.'},
+  {t:'Dependência de canal único', d:'A quase totalidade da carteira só anuncia no Meta, concentrando todo o risco em um canal.'},
+  {t:'Métrica sem padrão entre contas', d:'Cada cliente reporta um tipo de resultado diferente, o que é esperado — mas dificulta comparar e apresentar a carteira como um todo.'},
+];
+
+const MELHORIAS = [
+  {t:'Ficha padrão de report por cliente', d:'Investimento exato, KPI-norte, indício de conversão em venda, status de relacionamento e próximo passo — sempre no mesmo layout.'},
+  {t:'Ritual de captura de fechamento comercial', d:'Mesmo que manual/WhatsApp, para provar ROI de verdade e não só volume de leads.'},
+  {t:'Cadência de contato fixa', d:'Para os clientes distantes ou ausentes, cujo gargalo de comunicação já está afetando o resultado.'},
+  {t:'Upsell de Google Ads', d:'Nos clientes que hoje só usam Meta, como diversificação de canal e aumento de ticket médio.'},
+  {t:'Score objetivo de saúde do cliente', d:'Substituir o texto livre "Médio/Bom/Ruim" por critérios claros de presença, gargalo aberto e tendência de resultado.'},
+];
+
+const PRODUTOS = [
+  {tag:'RDA Report', h:'Score de saúde alimentado pelos critérios da carteira', d:'O admin.html do rdareport já calcula um score de saúde — dá para alimentá-lo com presença, gargalo e tendência e usar como fonte oficial da apresentação, sem depender de rótulo manual.'},
+  {tag:'Painel Inteligente', h:'Padronização já na criação do cliente', d:'O Painel Inteligente planejado (IA lendo briefing e montando o painel) é o lugar certo para forçar essa padronização desde o início da conta.'},
+  {tag:'ControlaLead', h:'Módulo simples de funil comercial', d:'Um status de fechamento por lead dentro do ControlaLead resolveria de vez o gargalo nº 1: hoje é o dado que mais falta e mais aparece como reclamação.'},
+  {tag:'Engajamento', h:'Checklist automático de contato', d:'Um alerta quando o cliente fica X dias sem responder ajudaria a agir antes do relacionamento virar gargalo — como já aconteceu com RedeBr e Abuse.'},
+];
+
+// ------------------------------------------------------------------
+// RENDER
+// ------------------------------------------------------------------
+let selectedIdx = 0;
+
+function fmtNum(n){ return n.toLocaleString('pt-BR'); }
+
+function computeDelta(jun, jul){
+  if(jun === 0) return {pct:null, dir:'flat'};
+  const pct = Math.round(((jul-jun)/jun)*1000)/10;
+  const dir = jul>jun ? 'up' : jul<jun ? 'down' : 'flat';
+  return {pct, dir};
+}
+
+function scoreColor(score){
+  if(score >= 90) return {main:'#159a5b', bg:'rgba(21,154,91,0.9)'};
+  if(score >= 75) return {main:'#1fa89a', bg:'rgba(31,168,154,0.9)'};
+  if(score >= 60) return {main:'#d99a1f', bg:'rgba(217,154,31,0.9)'};
+  return {main:'#e0435c', bg:'rgba(224,67,92,0.9)'};
+}
+
+function scoredClients(){ return CLIENTS.filter(c=>c.meta && typeof c.meta.score === 'number'); }
+
+function agencyScore(){
+  const scored = scoredClients();
+  if(!scored.length) return null;
+  const sum = scored.reduce((a,c)=>a+c.meta.score,0);
+  return Math.round(sum/scored.length);
+}
+
+function statStrip(){
+  const total = CLIENTS.length;
+  const retomando = CLIENTS.filter(c=>c.presence==='retomando').length;
+  const comGargalo = CLIENTS.filter(c=>c.gargalo).length;
+  const soMeta = CLIENTS.filter(c=>!c.invest.toLowerCase().includes('google')).length;
+  const score = agencyScore();
+  const scored = scoredClients();
+  const el = document.getElementById('statStrip');
+
+  const agencyCard = score===null ? '' : `
+    <div class="agency-score-card">
+      <svg class="ring" viewBox="0 0 64 64">
+        <circle cx="32" cy="32" r="27" fill="none" stroke="rgba(255,255,255,.15)" stroke-width="7"/>
+        <circle cx="32" cy="32" r="27" fill="none" stroke="${scoreColor(score).bg}" stroke-width="7"
+          stroke-linecap="round" stroke-dasharray="${2*Math.PI*27}"
+          stroke-dashoffset="${2*Math.PI*27*(1-score/100)}" transform="rotate(-90 32 32)"/>
+        <text x="32" y="38" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="20" fill="#fff">${score}</text>
+      </svg>
+      <div class="txt">
+        <h3>Score geral da agência (Meta Opportunity Score)</h3>
+        <p>Média entre ${scored.length} contas conectadas via Meta Ads — mede alinhamento com as boas práticas da própria Meta, não a saúde comercial da conta.</p>
+      </div>
+    </div>`;
+
+  el.innerHTML = `
+    ${agencyCard}
+    <div class="stat-strip">
+      <div class="stat-chip"><div class="n num">${total}</div><div class="l">Clientes na carteira</div></div>
+      <div class="stat-chip"><div class="n num">${comGargalo}</div><div class="l">Com gargalo mapeado</div></div>
+      <div class="stat-chip"><div class="n num">${retomando}</div><div class="l">Sem atividade no período (retomando)</div></div>
+      <div class="stat-chip"><div class="n num">${soMeta}</div><div class="l">Anunciam somente no Meta</div></div>
+    </div>
+  `;
+}
+
+function renderRows(){
+  const wrap = document.getElementById('rows');
+  wrap.innerHTML = CLIENTS.map((c,i)=>{
+    const h = HEALTH[c.health];
+    const p = PRESENCE[c.presence];
+    const mainMetric = c.metrics[0];
+    const metricSummary = mainMetric
+      ? `${mainMetric.label}: ${fmtNum(mainMetric.jul)}`
+      : (c.note ? c.note.text : 'Sem atividade');
+    const scoreBadge = (c.meta && typeof c.meta.score === 'number')
+      ? `<span class="presence-tag" style="color:${scoreColor(c.meta.score).main};background:${scoreColor(c.meta.score).main}14;">${c.meta.score}</span>`
+      : `<span class="presence-tag" style="color:var(--text-faint);background:var(--bg-soft);">—</span>`;
+    return `
+      <div class="row ${i===selectedIdx?'selected':''}" data-idx="${i}">
+        <div class="row-name">
+          <span class="dot" style="background:${h.color}"></span>
+          <b>${c.name}</b>
+        </div>
+        <div class="row-meta">${metricSummary}</div>
+        <div style="display:flex;gap:6px;align-items:center;">
+          ${scoreBadge}
+          <span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span>
+        </div>
+      </div>
+    `;
+  }).join('');
+  wrap.querySelectorAll('.row').forEach(r=>{
+    r.addEventListener('click', ()=>{ selectedIdx = parseInt(r.dataset.idx,10); renderRows(); renderDetail(); });
+  });
+}
+
+function metricCard(m){
+  const d = computeDelta(m.jun, m.jul);
+  const arrow = d.dir==='up' ? '▲' : d.dir==='down' ? '▼' : '—';
+  const deltaTxt = d.pct===null ? '' : `<span class="delta ${d.dir}">${arrow} ${Math.abs(d.pct)}%</span>`;
+  return `
+    <div class="metric-card">
+      <div class="eyebrow"><span class="icon-dot" style="background:var(--blue-bg);color:var(--blue);">${ICON.target}</span>${m.label}</div>
+      <div class="val num">${fmtNum(m.jul)}</div>
+      <div class="sub">Junho: <span class="num">${fmtNum(m.jun)}</span> &nbsp;${deltaTxt}</div>
+    </div>
+  `;
+}
+
+function renderMetaCard(meta){
+  if(!meta) return '';
+
+  if(meta.accountId && typeof meta.score === 'number'){
+    const col = scoreColor(meta.score);
+    const ring = `
+      <svg class="score-ring" viewBox="0 0 56 56" style="background:none;">
+        <circle cx="28" cy="28" r="24" fill="none" stroke="var(--bg-soft)" stroke-width="5"/>
+        <circle cx="28" cy="28" r="24" fill="none" stroke="${col.main}" stroke-width="5" stroke-linecap="round"
+          stroke-dasharray="${2*Math.PI*24}" stroke-dashoffset="${2*Math.PI*24*(1-meta.score/100)}" transform="rotate(-90 28 28)"/>
+        <text x="28" y="33" text-anchor="middle" font-family="Manrope,sans-serif" font-weight="800" font-size="16" fill="${col.main}">${meta.score}</text>
+      </svg>`;
+    const rec = meta.topRec
+      ? `<div class="top-rec">Maior oportunidade da Meta: <b>${meta.topRec}</b> (+${meta.lift} pts)</div>`
+      : `<div class="top-rec">Nenhuma recomendação pendente da Meta no momento.</div>`;
+    const ambiguous = meta.ambiguous ? `<div class="meta-flag">⚠ ${meta.ambiguous}</div>` : '';
+    return `
+      <div class="meta-card">
+        ${ring}
+        <div class="meta-info">
+          <div class="acc-name">${meta.accountName}</div>
+          <div class="acc-sub">${meta.business || 'Sem Business Manager vinculado'} · ID ${meta.accountId}</div>
+          ${rec}
+          ${ambiguous}
+        </div>
+        <a class="meta-link" href="https://adsmanager.facebook.com/adsmanager/manage/campaigns?act=${meta.accountId}" target="_blank" rel="noopener">Abrir no Meta Ads Manager →</a>
+      </div>`;
+  }
+
+  return `
+    <div class="meta-card">
+      <span class="icon-round" style="width:32px;height:32px;background:var(--amber-bg);color:var(--amber);flex-shrink:0;">${ICON.alert}</span>
+      <div class="meta-missing">${meta.notFound || 'Conta do Meta não vinculada.'}${meta.accountId ? `<br><span style="color:var(--text-faint)">ID encontrado: ${meta.accountId}</span>` : ''}</div>
+    </div>`;
+}
+
+function renderDetail(){
+  const c = CLIENTS[selectedIdx];
+  const h = HEALTH[c.health];
+  const p = PRESENCE[c.presence];
+  const el = document.getElementById('detail');
+
+  const metricsHtml = c.metrics.length
+    ? `<div class="metric-grid">${c.metrics.map(metricCard).join('')}</div>`
+    : c.note
+      ? `<div class="metric-grid"><div class="metric-card"><div class="eyebrow"><span class="icon-dot" style="background:var(--green-bg);color:var(--green);">${ICON.target}</span>${c.note.label}</div><div class="val">${c.note.text}</div></div></div>`
+      : `<div class="metric-grid"><div class="metric-card"><div class="eyebrow">Resultado</div><div class="val" style="font-size:14px;color:var(--text-faint);font-weight:600;">Sem atividade registrada neste período</div></div></div>`;
+
+  const gargaloHtml = c.gargalo
+    ? `<p>${c.gargalo}</p>`
+    : `<p>${c.gargaloNote || 'Nenhum gargalo relevante registrado neste período.'}</p>`;
+
+  const oportunidadeHtml = c.oportunidade
+    ? `<p>${c.oportunidade}</p>`
+    : `<p>Ainda sem oportunidade registrada — conta em retomada.</p>`;
+
+  const metaHtml = renderMetaCard(c.meta);
+
+  el.innerHTML = `
+    <div class="detail-head">
+      <div>
+        <h2>${c.name}</h2>
+        <span class="health-pill" style="color:${h.color};background:${h.bg}">${h.label}</span>
+        <div class="invest-line"><strong>Investimento:</strong> ${c.invest}</div>
+      </div>
+      <span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span>
+    </div>
+
+    ${metaHtml}
+
+    <div class="info-card" style="margin-bottom:16px;">
+      <div class="eyebrow"><span class="icon-round" style="width:18px;height:18px;background:var(--violet-bg);color:var(--violet);">${ICON.users}</span>Presença do cliente</div>
+      <p>${c.presenceNote}</p>
+    </div>
+
+    ${metricsHtml}
+
+    <div class="info-pair">
+      <div class="info-card ${!c.gargalo ? 'empty' : ''}">
+        <div class="eyebrow"><span class="icon-round" style="width:18px;height:18px;background:var(--red-bg);color:var(--red);">${ICON.alert}</span>Gargalo</div>
+        ${gargaloHtml}
+      </div>
+      <div class="info-card ${!c.oportunidade ? 'empty' : ''}">
+        <div class="eyebrow"><span class="icon-round" style="width:18px;height:18px;background:var(--pink-bg);color:var(--pink);">${ICON.bulb}</span>Oportunidade</div>
+        ${oportunidadeHtml}
+      </div>
+    </div>
+
+    <div class="next-step">
+      <div class="eyebrow">${ICON.flag} Próximo passo</div>
+      <p>${c.proximo}</p>
+    </div>
+  `;
+}
+
+function renderMetaInsight(){
+  const el = document.getElementById('metaInsightBanner');
+  const withRec = CLIENTS.filter(c=>c.meta && c.meta.topRec);
+  if(!withRec.length){ el.innerHTML=''; return; }
+  const counts = {};
+  withRec.forEach(c=>{ counts[c.meta.topRec] = (counts[c.meta.topRec]||0)+1; });
+  const [topLabel, topCount] = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
+  el.innerHTML = `
+    <div class="meta-insight-banner">
+      <span class="icon-round" style="width:32px;height:32px;background:var(--blue-bg);color:var(--blue);flex-shrink:0;">${ICON.target}</span>
+      <div>
+        <h4>Recomendação mais recorrente do Meta na carteira</h4>
+        <p><b>${topLabel}</b> aparece como oportunidade em ${topCount} de ${withRec.length} contas com recomendações pendentes — um ajuste único que, se replicado, pode melhorar o Opportunity Score de boa parte da carteira de uma vez.</p>
+      </div>
+    </div>`;
+}
+
+function renderInsights(){
+  document.getElementById('gargalosGrid').innerHTML = GARGALOS.map((g,i)=>`
+    <div class="insight-card">
+      <div class="n num">${String(i+1).padStart(2,'0')}</div>
+      <h4>${g.t}</h4>
+      <p>${g.d}</p>
+    </div>`).join('');
+
+  document.getElementById('melhoriasGrid').innerHTML = MELHORIAS.map((m,i)=>`
+    <div class="insight-card">
+      <div class="n num">${String(i+1).padStart(2,'0')}</div>
+      <h4>${m.t}</h4>
+      <p>${m.d}</p>
+    </div>`).join('');
+
+  document.getElementById('produtoGrid').innerHTML = PRODUTOS.map(p=>`
+    <div class="product-card">
+      <span class="tag">${p.tag}</span>
+      <h4>${p.h}</h4>
+      <p>${p.d}</p>
+    </div>`).join('');
+}
+
+// ------------------------------------------------------------------
+// NAV
+// ------------------------------------------------------------------
+const VIEWS = ['clients','panorama','produto'];
+let viewIdx = 0;
+
+function setView(name){
+  viewIdx = VIEWS.indexOf(name);
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
+  document.getElementById('prevBtn').disabled = viewIdx===0;
+  document.getElementById('nextBtn').disabled = viewIdx===VIEWS.length-1;
+}
+
+document.getElementById('tabs').addEventListener('click', e=>{
+  const btn = e.target.closest('.tab-btn');
+  if(btn) setView(btn.dataset.view);
+});
+document.getElementById('prevBtn').addEventListener('click', ()=>{ if(viewIdx>0) setView(VIEWS[viewIdx-1]); });
+document.getElementById('nextBtn').addEventListener('click', ()=>{ if(viewIdx<VIEWS.length-1) setView(VIEWS[viewIdx+1]); });
+
+// ------------------------------------------------------------------
+// INIT
+// ------------------------------------------------------------------
+statStrip();
+renderRows();
+renderDetail();
+renderInsights();
+renderMetaInsight();
+setView('clients');
+</script>
+</body>
+</html>

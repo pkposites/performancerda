@@ -266,6 +266,19 @@
 
   <div id="statStrip"></div>
 
+  <!-- CONTROLES DE ATUALIZAÇÃO -->
+  <div class="list-card" style="padding:16px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;">
+    <div style="display:flex;flex-direction:column;gap:6px;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);">Período do próximo refresh de tráfego</span>
+      <div id="periodPills" style="display:flex;gap:6px;">
+        <button class="tab-btn period-pill" data-period="7" style="border:1px solid var(--border);">7 dias</button>
+        <button class="tab-btn period-pill active" data-period="15" style="border:1px solid var(--border);">15 dias</button>
+        <button class="tab-btn period-pill" data-period="30" style="border:1px solid var(--border);">30 dias</button>
+      </div>
+    </div>
+    <button id="requestUpdateBtn" class="nav-btn" style="background:var(--text);color:#fff;">🔄 Solicitar atualização de dados</button>
+  </div>
+
   <!-- CLIENTES -->
   <section class="view active" id="view-clients">
     <div class="clients-grid">
@@ -273,15 +286,19 @@
         <div class="list-head">
           <h3>Carteira de clientes</h3>
           <span>Toque em um cliente para ver o detalhamento · ordenado por score de saúde (pior primeiro)</span>
-          <div style="display:flex;gap:8px;margin-top:10px;">
-            <input type="text" id="searchInput" placeholder="Buscar cliente..." style="flex:1;min-width:0;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:13px;background:var(--bg-soft);color:var(--text);">
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <input type="text" id="searchInput" placeholder="Buscar cliente..." style="flex:1;min-width:120px;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:13px;background:var(--bg-soft);color:var(--text);">
             <select id="sortSelect" style="border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:12.5px;background:var(--bg-soft);color:var(--text);">
-              <option value="healthAsc">Saúde: pior primeiro</option>
-              <option value="healthDesc">Saúde: melhor primeiro</option>
+              <option value="healthAsc">Termômetro: pior primeiro</option>
+              <option value="healthDesc">Termômetro: melhor primeiro</option>
               <option value="meta">Meta Score</option>
               <option value="name">Ordem alfabética</option>
             </select>
           </div>
+          <label style="display:flex;align-items:center;gap:7px;margin-top:10px;font-size:12.5px;color:var(--text-soft);cursor:pointer;">
+            <input type="checkbox" id="quedaTrafegoToggle" style="width:15px;height:15px;cursor:pointer;">
+            Mostrar só quedas de tráfego (só campanha, sem contar relação)
+          </label>
         </div>
         <div class="rows" id="rows"></div>
       </div>
@@ -685,11 +702,22 @@ function statStrip(){
 let selectedName = CLIENTS[0].name;
 let sortMode = 'healthAsc';
 let searchTerm = '';
+let updatePeriodDays = 15;
+let onlyTrafficDrop = false;
 
 function getSelectedClient(){ return CLIENTS.find(c=>c.name===selectedName) || CLIENTS[0]; }
 
+// "Queda de tráfego" olha só pra tendência do resultado de campanha
+// (metricTrend, puxado da Meta) — não entra presença, gargalo nem
+// nenhum fator de relacionamento aqui, de propósito.
+function isTrafficDrop(client){
+  const trend = metricTrend(client);
+  return trend !== null && trend < 0;
+}
+
 function sortedFilteredClients(){
   let list = CLIENTS.filter(c=>c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+  if(onlyTrafficDrop) list = list.filter(isTrafficDrop);
   const byHealth = (a,b)=>computeThermometer(a).total-computeThermometer(b).total;
   if(sortMode==='healthAsc') list = list.slice().sort(byHealth);
   else if(sortMode==='healthDesc') list = list.slice().sort((a,b)=>-byHealth(a,b));
@@ -707,7 +735,10 @@ function renderRows(){
   const wrap = document.getElementById('rows');
   const list = sortedFilteredClients();
   if(!list.length){
-    wrap.innerHTML = `<div style="padding:24px 18px;color:var(--text-faint);font-size:13px;">Nenhum cliente encontrado para "${searchTerm}".</div>`;
+    const msg = onlyTrafficDrop
+      ? 'Nenhum cliente com queda de tráfego no período — carteira estável do lado de campanha.'
+      : `Nenhum cliente encontrado para "${searchTerm}".`;
+    wrap.innerHTML = `<div style="padding:24px 18px;color:var(--text-faint);font-size:13px;">${msg}</div>`;
     return;
   }
   wrap.innerHTML = list.map(c=>{
@@ -921,6 +952,52 @@ document.getElementById('prevBtn').addEventListener('click', ()=>{ if(viewIdx>0)
 document.getElementById('nextBtn').addEventListener('click', ()=>{ if(viewIdx<VIEWS.length-1) setView(VIEWS[viewIdx+1]); });
 document.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; renderRows(); });
 document.getElementById('sortSelect').addEventListener('change', e=>{ sortMode = e.target.value; renderRows(); });
+document.getElementById('quedaTrafegoToggle').addEventListener('change', e=>{ onlyTrafficDrop = e.target.checked; renderRows(); });
+
+document.querySelectorAll('.period-pill').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    updatePeriodDays = btn.dataset.period;
+    document.querySelectorAll('.period-pill').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+});
+
+function buildUpdateRequestText(){
+  const contas = CLIENTS.filter(c=>c.meta && c.meta.accountId);
+  const linhas = contas.map(c=>`- ${c.name} (${c.meta.accountId})`).join('\n');
+  const hoje = new Date().toLocaleDateString('pt-BR');
+  return [
+    `Pedido de atualização de dados de tráfego — Termômetro Pra Cima`,
+    `Período solicitado: últimos ${updatePeriodDays} dias`,
+    `Data do pedido: ${hoje}`,
+    ``,
+    `Por favor, puxe via MCP da Meta (Opportunity Score + resultado/custo de campanha) para:`,
+    linhas,
+    ``,
+    `Relação/presença/gargalo eu ajusto manualmente à parte.`,
+  ].join('\n');
+}
+
+document.getElementById('requestUpdateBtn').addEventListener('click', async ()=>{
+  const text = buildUpdateRequestText();
+  const btn = document.getElementById('requestUpdateBtn');
+  const original = btn.textContent;
+  try{
+    if(navigator.clipboard && window.isSecureContext){
+      await navigator.clipboard.writeText(text);
+    } else {
+      const ta = document.createElement('textarea');
+      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+      document.body.appendChild(ta); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    btn.textContent = '✅ Copiado! Cole no chat com o Claude';
+  }catch(e){
+    btn.textContent = '⚠️ Não deu pra copiar — tenta de novo';
+  }
+  setTimeout(()=>{ btn.textContent = original; }, 3500);
+});
 
 // ------------------------------------------------------------------
 // INIT

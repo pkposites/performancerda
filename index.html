@@ -349,7 +349,7 @@
   </section>
 
   <div class="footer-bar">
-    <div class="left">Dados de Agosto–Setembro/2026 (mesmo período de referência anterior — atualizaremos em breve) · RDA / Pra Cima Company</div>
+    <div class="left">Dados de tráfego (Meta Ads) atualizados em 28/09/2026, período 13–28/09 · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
     <div class="nav-arrows">
       <button class="nav-btn" id="prevBtn">← Anterior</button>
       <button class="nav-btn" id="nextBtn">Próximo →</button>
@@ -397,60 +397,73 @@ const CLIENTS = [
   {name:'RedeBr', presence:'ausente',
     presenceNote:'Não! Tem estado bem afastado ultimamente',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
-    metrics:[{label:'Visitas ao perfil', jun:3448, jul:3496},{label:'Mensagens (Meta Ads)', jun:728, jul:760, cost:4.80}],
+    metrics:[
+      {label:'Visitas ao perfil (Meta Ads)', jun:3496, jul:2041, cost:0.47},
+      {label:'Mensagens (Meta Ads)', jun:760, jul:822, cost:4.53},
+    ],
     gargalo:'Sumiço e falta de companheirismo por parte do cliente.',
     oportunidade:'Se pudéssemos ter mais clareza do resultado, o cliente ficaria mais confortável.',
     proximo:'Agendar contato direto essa semana e apresentar um relatório claro de resultados para reengajar.',
-    meta:{accountId:'1660608817357420', accountName:'CA - Duque de Caxias', business:'RedeBr Telecom', score:84, topRec:'Testar campanha de clique para mensagem (Advantage+)', lift:4}},
+    meta:{accountId:'1660608817357420', accountName:'CA - Duque de Caxias', business:'RedeBr Telecom', score:91, topRec:'Testar campanha de mensagens personalizada com Advantage+', lift:5}},
 
   {name:'Mega Seguros', presence:'parcial',
     presenceNote:'Presente, mas um pouco distante nos últimos 15 dias',
     invest:'R$ 6.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Visitas ao perfil (Meta Ads)', jun:4662, jul:1252, cost:0.30},{label:'Mensagens (Meta Ads)', jun:166, jul:222, cost:18.78}],
+    metrics:[
+      {label:'Visitas ao perfil (Meta Ads)', jun:1252, jul:1502, cost:0.48},
+      {label:'Mensagens (Meta Ads)', jun:222, jul:145, cost:21.13},
+      {label:'Tráfego para LP (Meta Ads)', jun:null, jul:177, cost:0.36},
+    ],
     gargalo:'Sem acompanhamento real do processo de vendas e faturamento.',
     oportunidade:'Investimento alto; espaço para ofertas e volume de leads para follow-up/resgate.',
-    proximo:'Propor captura conjunta de dados de fechamento para provar o ROI do investimento alto.',
-    meta:{accountId:'1005447634842069', accountName:'CA - Mega Mais', business:'Mega Proteção Veicular', score:90, topRec:'Aumentar orçamento — conjuntos estão limitados', lift:6}},
+    proximo:'Propor captura conjunta de dados de fechamento para provar o ROI do investimento alto; e investigar a queda de mensagens (222→145) e do score Meta (90→69) neste ciclo.',
+    meta:{accountId:'1005447634842069', accountName:'CA - Mega Mais', business:'Mega Proteção Veicular', score:69, topRec:'Aumentar orçamento — conjuntos estão limitados', lift:10}},
 
   {name:'Vamos Festas', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:166, jul:260, cost:3.36}],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:260, jul:103, cost:4.23}],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
-    proximo:'Propor Google Ads na próxima reunião e formalizar o acompanhamento de fechamentos.',
-    meta:{accountId:'1755638351664021', accountName:'CONTA DE ANUNCIO ESPAÇO VAMOS', business:'Espaço Vamos - Festas e Eventos', score:70, topRec:'Consolidar conjuntos de anúncios com públicos parecidos', lift:19}},
+    proximo:'Propor Google Ads na próxima reunião, formalizar o acompanhamento de fechamentos e resolver a fragmentação de conjuntos que a Meta segue sinalizando (score parado em ~65-70 há dois ciclos).',
+    meta:{accountId:'1755638351664021', accountName:'CONTA DE ANUNCIO ESPAÇO VAMOS', business:'Espaço Vamos - Festas e Eventos', score:65, topRec:'Consolidar conjuntos de anúncios com públicos parecidos', lift:19}},
 
   {name:'Auditório', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:71, jul:71, cost:12.52},
-      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:528, cost:0.34},
+      {label:'Mensagens (Meta Ads)', jun:71, jul:15, cost:14.88},
+      {label:'Visitas ao perfil (Meta Ads)', jun:528, jul:162, cost:0.38},
     ],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
-    proximo:'Investigar o custo por mensagem, que subiu bastante, e propor Google Ads + uma nova oferta.',
-    meta:{accountId:'387692584324747', accountName:'CA - Auditório', business:'Auditorio Edite da Rocha Farias', score:82, topRec:'Aumentar orçamento — conjunto está limitado', lift:10}},
+    proximo:'Queda forte de mensagens (71→15) e de visitas (528→162) neste ciclo — investigar com urgência antes de propor Google Ads e nova oferta.',
+    meta:{accountId:'387692584324747', accountName:'CA - Auditório', business:'Auditorio Edite da Rocha Farias', score:83, topRec:'Aumentar orçamento — conjunto está limitado', lift:10}},
 
   {name:'RR ON Auto', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.500 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:545, jul:602, cost:2.26}],
+    metrics:[
+      {label:'Mensagens (Meta Ads)', jun:602, jul:270, cost:2.06},
+      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:206, cost:0.49},
+    ],
     gargalo:null,
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
-    proximo:'Propor teste de Google Ads para diversificar o canal.',
-    meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:97, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:2}},
+    proximo:'Propor teste de Google Ads para diversificar o canal; investigar a queda de volume de mensagens (602→270), apesar do custo por mensagem ter melhorado.',
+    meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:94, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:2}},
 
   {name:'Plasart', presence:'parcial',
     presenceNote:'Presente na medida do possível',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Visitas ao perfil', jun:2132, jul:2993}],
+    metrics:[
+      {label:'Visitas ao perfil (Meta Ads)', jun:2993, jul:1005, cost:0.46},
+      {label:'Leads (Meta Ads)', jun:null, jul:93, cost:3.74},
+    ],
     gargalo:null,
     gargaloNote:'Não considera gargalos atualmente — só precisa estar conectado.',
-    oportunidade:'Focar em aumento de novos clientes e no crescimento do Instagram.',
-    proximo:'Focar o próximo ciclo em crescimento de seguidores e novos clientes no Instagram.',
-    meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:100, topRec:null, lift:0}},
+    oportunidade:'Focar em aumento de novos clientes e no crescimento do Instagram. Novidade: surgiu campanha de captura de leads (93 no ciclo) que não existia antes — vale perguntar ao cliente se foi decisão deles.',
+    proximo:'Focar o próximo ciclo em crescimento de seguidores e novos clientes no Instagram; resolver a fragmentação de conjuntos que fez o score Meta cair de 100 para 80.',
+    meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:80, topRec:'Combinar conjuntos de anúncios semelhantes (fragmentação)', lift:5}},
 
   {name:'RioSul Tradição', presence:'retomando',
     presenceNote:'Retomando agora',
@@ -500,33 +513,37 @@ const CLIENTS = [
   {name:'Sal da terra', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 1.200 Meta (não anuncia no Google)',
-    metrics:[{label:'Visitas ao perfil', jun:2529, jul:2327},{label:'Mensagens', jun:258, jul:265},{label:'Leads (LP grupo)', jun:288, jul:265}],
+    metrics:[
+      {label:'Visitas ao perfil (Meta Ads)', jun:2327, jul:743, cost:0.40},
+      {label:'Mensagens (Meta Ads)', jun:265, jul:122, cost:2.01},
+      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:null, jul:1133, cost:0.15},
+    ],
     gargalo:'Falta de acompanhamento real de desempenho de forma palpável.',
     oportunidade:'Estar mais presente para entender esses números junto ao cliente.',
-    proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente.',
-    meta:{accountId:'4161983374048532', accountName:'Sal da Terra CA', business:'Sal Da Terra Sal Da Terra', score:97, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:1}},
+    proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente; investigar a queda de visitas e mensagens neste ciclo (dado antigo "Leads LP grupo" foi substituído por clique real pro grupo de WhatsApp, não são a mesma métrica).',
+    meta:{accountId:'4161983374048532', accountName:'Sal da Terra CA', business:'Sal Da Terra Sal Da Terra', score:96, topRec:'Combinar 2 conjuntos de anúncios semelhantes (fragmentação)', lift:4}},
 
   {name:'Barra 2', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:null, jul:153, cost:15.01},
+      {label:'Mensagens (Meta Ads)', jun:153, jul:107, cost:11.61},
     ],
     gargalo:'Acompanhamento de vendas reais não acontece.',
     oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
-    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso; e revisar o orçamento, que a Meta está sinalizando como limitado em quase todas as campanhas.',
-    meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:75, topRec:'Aumentar orçamento — campanhas estão limitadas', lift:20,
-      correcao:'⚠️ Conta corrigida em 13/09/2026: a conta usada antes ("Grupo Barra 2" / 1515195049412961, praticamente sem atividade real) estava errada. A conta certa é esta — 19 campanhas ativas, uma por modelo de veículo, todas otimizando para mensagens no WhatsApp.'}},
+    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso; orçamento segue limitado em várias campanhas, mas custo por mensagem melhorou (R$15,01 → R$11,61).',
+    meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:81, topRec:'Aumentar orçamento de 5 campanhas', lift:10,
+      correcao:'⚠️ Conta corrigida em 13/09/2026: a conta usada antes ("Grupo Barra 2" / 1515195049412961, praticamente sem atividade real) estava errada. A conta certa é esta — campanhas ativas por modelo de veículo, otimizando para mensagens no WhatsApp.'}},
 
   {name:'Horto', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 700 Meta + R$ 650 Google',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:null, jul:589, cost:1.49}],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:589, jul:405, cost:1.73}],
     note:{label:'Faturamento em vendas', text:'Acima de R$ 100 mil em ambos os meses'},
     gargalo:'Sem controle real do retorno em vendas.',
     oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
     proximo:'Formalizar a captura de retorno em vendas para documentar o case oficial.',
-    meta:{accountId:'1138519810136500', accountName:'Horto Grande Rio', business:'Horto Grande Rio', score:87, topRec:'Aumentar orçamento — campanhas estão limitadas', lift:9}},
+    meta:{accountId:'1138519810136500', accountName:'Horto Grande Rio', business:'Horto Grande Rio', score:91, topRec:'Otimizar criativos com melhorias Advantage+', lift:6}},
 
   {name:'Igor Gringo', presence:'retomando',
     presenceNote:'Cliente novo na carteira — ainda sem leitura de relação/presença, aguardando primeira reunião de alinhamento.',
@@ -539,7 +556,7 @@ const CLIENTS = [
     gargaloNote:'Cliente novo — gargalo ainda não mapeado.',
     oportunidade:'Conta com bom orçamento e forte engajamento orgânico via anúncio; hoje só reconhecimento/engajamento — espaço para evoluir para geração de mensagens/leads.',
     proximo:'Fazer reunião de abertura, registrar presença/gargalo e definir um objetivo comercial (mensagens ou leads) além de reconhecimento.',
-    meta:{accountId:'1419457343463109', accountName:'CA - Igor Gringo [Partido]', business:'CACS', score:99, topRec:'Duplicar anúncio com criativo limitado e trocar imagem/vídeo', lift:1}},
+    meta:{accountId:'1419457343463109', accountName:'CA - Igor Gringo [Partido]', business:'CACS', score:100, topRec:null, lift:0}},
 ];
 
 // ------------------------------------------------------------------

@@ -383,7 +383,7 @@ const PRESENCE = {
 // oficial de cada conta (0-100, escala da própria Meta — mede alinhamento com
 // boas práticas da plataforma, não é o "score de saúde" da conta com a agência).
 const CLIENTS = [
-  {name:'RedeBr', presence:'ausente',
+  {name:'RedeBr', presence:'ausente', delicado:true,
     presenceNote:'Aparecem só em momentos de atrito/reclamação — tratam a agência como adversária, não como parceira.',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
     metrics:[
@@ -441,7 +441,7 @@ const CLIENTS = [
     proximo:'Acompanhar de perto o resultado do realinhamento de estrutura feito na última reunião.',
     meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:94, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:2}},
 
-  {name:'Plasart', presence:'parcial',
+  {name:'Plasart', presence:'parcial', delicado:true,
     presenceNote:'Sem mudança na relação com a agência, mas o comercial do lado do cliente está preocupando.',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
@@ -453,7 +453,7 @@ const CLIENTS = [
     proximo:'Marcar reunião pra alinhar os passos do próximo mês até o fim do ano; acompanhar de perto se os leads estão virando fechamento. Score Meta caiu de 100 para 80 por fragmentação de conjuntos — resolver.',
     meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:80, topRec:'Combinar conjuntos de anúncios semelhantes (fragmentação)', lift:5}},
 
-  {name:'RioSul Tradição', presence:'presente',
+  {name:'RioSul Tradição', presence:'presente', delicado:true,
     presenceNote:'Relação boa e alinhada, equipe toda ciente do formato de trabalhos pontuais.',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
@@ -474,7 +474,7 @@ const CLIENTS = [
     proximo:'Aguardar a próxima demanda pontual do cliente.',
     meta:{accountId:null, notFound:'Conta não localizada automaticamente entre as contas do Meta acessíveis — confirmar nome exato com o cliente.'}},
 
-  {name:'Abuse', presence:'distante',
+  {name:'Abuse', presence:'distante', delicado:true,
     presenceNote:'Melhorou de "ausente" — reapareceu, deu satisfação sobre a ausência e sinalizou volta com novos criativos em breve.',
     invest:'R$ 660 Meta (não anuncia no Google)',
     metrics:[{label:'Mensagens', jun:225, jul:211}],
@@ -504,7 +504,7 @@ const CLIENTS = [
     proximo:'Aguardar criativos e resolver a restrição, junto com We Pink Caxias.',
     meta:{accountId:null, notFound:'Não há conta própria localizada — o orçamento é dividido com We Pink Caxias, dentro do mesmo Business Manager (BM We Pink).'}},
 
-  {name:'Sal da terra', presence:'presente',
+  {name:'Sal da terra', presence:'presente', delicado:true,
     presenceNote:'Segue trabalho de reforço de marca, visita ao perfil, divulgação de promoções.',
     invest:'R$ 1.200 Meta (não anuncia no Google)',
     metrics:[
@@ -529,7 +529,7 @@ const CLIENTS = [
     meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:81, topRec:'Aumentar orçamento de 5 campanhas', lift:10,
       correcao:'⚠️ Conta corrigida em 13/09/2026: a conta usada antes ("Grupo Barra 2" / 1515195049412961, praticamente sem atividade real) estava errada. A conta certa é esta — campanhas ativas por modelo de veículo, otimizando para mensagens no WhatsApp.'}},
 
-  {name:'Horto', presence:'presente',
+  {name:'Horto', presence:'presente', delicado:true,
     presenceNote:'Segue rodando bem na estratégia e no contrato.',
     invest:'R$ 700 Meta + R$ 650 Google',
     metrics:[{label:'Mensagens (Meta Ads)', jun:575, jul:627, cost:1.64}],
@@ -632,6 +632,10 @@ function computeRelationScore(client){
   score += PRESENCE_PENALTY[client.presence] || 0;
   if(client.gargalo) score -= 16;
   if(!hasSalesData(client)) score -= 6; // cliente não compartilha dado de venda/fechamento
+  // Marcado manualmente pelo gestor como delicado — puxa o score pra baixo
+  // de propósito, mesmo quando o texto do gargalo soa resolvido/tranquilo.
+  // A reunião é pra apontar melhoria, não pra maquiar.
+  if(client.delicado) score -= 12;
   return clamp100(score);
 }
 

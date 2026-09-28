@@ -279,20 +279,9 @@
 
   <div id="statStrip"></div>
 
-  <!-- CONTROLES DE ATUALIZAÇÃO -->
-  <div class="list-card" style="padding:16px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:space-between;">
-    <div style="display:flex;flex-direction:column;gap:6px;">
-      <span style="font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);">Período do próximo refresh de tráfego</span>
-      <div id="periodPills" style="display:flex;gap:6px;">
-        <button class="tab-btn period-pill" data-period="7" style="border:1px solid var(--border);">7 dias</button>
-        <button class="tab-btn period-pill active" data-period="15" style="border:1px solid var(--border);">15 dias</button>
-        <button class="tab-btn period-pill" data-period="30" style="border:1px solid var(--border);">30 dias</button>
-      </div>
-    </div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;">
-      <button id="generateAgendaBtn" class="nav-btn" style="background:var(--violet);color:#fff;">📋 Gerar pauta da próxima reunião</button>
-      <button id="requestUpdateBtn" class="nav-btn" style="background:var(--text);color:#fff;">🔄 Solicitar atualização de dados</button>
-    </div>
+  <!-- CONTROLES -->
+  <div class="list-card" style="padding:16px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:flex-end;">
+    <button id="generateAgendaBtn" class="nav-btn" style="background:var(--violet);color:#fff;">📋 Gerar pauta da próxima reunião</button>
   </div>
 
   <!-- CLIENTES -->
@@ -349,7 +338,7 @@
   </section>
 
   <div class="footer-bar">
-    <div class="left">Dados de tráfego (Meta Ads) atualizados em 28/09/2026, período 13–28/09 · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
+    <div class="left">Dados de tráfego (Meta Ads) atualizados em 28/09/2026, últimos 30 dias · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
     <div class="nav-arrows">
       <button class="nav-btn" id="prevBtn">← Anterior</button>
       <button class="nav-btn" id="nextBtn">Próximo →</button>
@@ -398,8 +387,8 @@ const CLIENTS = [
     presenceNote:'Não! Tem estado bem afastado ultimamente',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:3496, jul:2041, cost:0.47},
-      {label:'Mensagens (Meta Ads)', jun:760, jul:822, cost:4.53},
+      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:3601, cost:0.44},
+      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:1865, cost:3.97},
     ],
     gargalo:'Sumiço e falta de companheirismo por parte do cliente.',
     oportunidade:'Se pudéssemos ter mais clareza do resultado, o cliente ficaria mais confortável.',
@@ -410,19 +399,19 @@ const CLIENTS = [
     presenceNote:'Presente, mas um pouco distante nos últimos 15 dias',
     invest:'R$ 6.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:1252, jul:1502, cost:0.48},
-      {label:'Mensagens (Meta Ads)', jun:222, jul:145, cost:21.13},
-      {label:'Tráfego para LP (Meta Ads)', jun:null, jul:177, cost:0.36},
+      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:3397, cost:0.45},
+      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:266, cost:27.33},
+      {label:'Tráfego para LP (Meta Ads, 30d)', jun:null, jul:148, cost:0.38},
     ],
     gargalo:'Sem acompanhamento real do processo de vendas e faturamento.',
     oportunidade:'Investimento alto; espaço para ofertas e volume de leads para follow-up/resgate.',
-    proximo:'Propor captura conjunta de dados de fechamento para provar o ROI do investimento alto; e investigar a queda de mensagens (222→145) e do score Meta (90→69) neste ciclo.',
+    proximo:'Propor captura conjunta de dados de fechamento para provar o ROI do investimento alto; custo por mensagem subiu bastante (R$27,33) e o score Meta segue baixo (69) — investigar.',
     meta:{accountId:'1005447634842069', accountName:'CA - Mega Mais', business:'Mega Proteção Veicular', score:69, topRec:'Aumentar orçamento — conjuntos estão limitados', lift:10}},
 
   {name:'Vamos Festas', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:260, jul:103, cost:4.23}],
+    metrics:[{label:'Mensagens (Meta Ads, 30d)', jun:null, jul:178, cost:4.75}],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
     proximo:'Propor Google Ads na próxima reunião, formalizar o acompanhamento de fechamentos e resolver a fragmentação de conjuntos que a Meta segue sinalizando (score parado em ~65-70 há dois ciclos).',
@@ -432,36 +421,36 @@ const CLIENTS = [
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:71, jul:15, cost:14.88},
-      {label:'Visitas ao perfil (Meta Ads)', jun:528, jul:162, cost:0.38},
+      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:43, cost:12.72},
+      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:402, cost:0.37},
     ],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
-    proximo:'Queda forte de mensagens (71→15) e de visitas (528→162) neste ciclo — investigar com urgência antes de propor Google Ads e nova oferta.',
+    proximo:'Propor Google Ads e uma nova oferta; volume ainda baixo nos últimos 30 dias (43 mensagens) — vale reforçar orçamento, como a própria Meta está sinalizando.',
     meta:{accountId:'387692584324747', accountName:'CA - Auditório', business:'Auditorio Edite da Rocha Farias', score:83, topRec:'Aumentar orçamento — conjunto está limitado', lift:10}},
 
   {name:'RR ON Auto', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.500 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:602, jul:270, cost:2.06},
-      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:206, cost:0.49},
+      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:456, cost:2.31},
+      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:369, cost:0.48},
     ],
     gargalo:null,
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
-    proximo:'Propor teste de Google Ads para diversificar o canal; investigar a queda de volume de mensagens (602→270), apesar do custo por mensagem ter melhorado.',
+    proximo:'Propor teste de Google Ads para diversificar o canal.',
     meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:94, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:2}},
 
   {name:'Plasart', presence:'parcial',
     presenceNote:'Presente na medida do possível',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:2993, jul:1005, cost:0.46},
-      {label:'Leads (Meta Ads)', jun:null, jul:93, cost:3.74},
+      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:977, cost:0.46},
+      {label:'Leads (Meta Ads, 30d)', jun:null, jul:92, cost:3.69},
     ],
     gargalo:null,
     gargaloNote:'Não considera gargalos atualmente — só precisa estar conectado.',
-    oportunidade:'Focar em aumento de novos clientes e no crescimento do Instagram. Novidade: surgiu campanha de captura de leads (93 no ciclo) que não existia antes — vale perguntar ao cliente se foi decisão deles.',
+    oportunidade:'Focar em aumento de novos clientes e no crescimento do Instagram. Novidade: surgiu campanha de captura de leads (92 no ciclo) que não existia antes — vale perguntar ao cliente se foi decisão deles.',
     proximo:'Focar o próximo ciclo em crescimento de seguidores e novos clientes no Instagram; resolver a fragmentação de conjuntos que fez o score Meta cair de 100 para 80.',
     meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:80, topRec:'Combinar conjuntos de anúncios semelhantes (fragmentação)', lift:5}},
 
@@ -496,10 +485,11 @@ const CLIENTS = [
   {name:'We Pink Caxias', presence:'distante',
     presenceNote:'Já foi mais presente; ultimamente tem estado distante',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Alcance', jun:170616, jul:62710},{label:'Visitas ao perfil', jun:628, jul:155}],
+    metrics:[{label:'Cliques p/ grupo de WhatsApp (Meta Ads, 30d)', jun:null, jul:1904, cost:0.10}],
     gargalo:'Falta de possibilidade de ações de conversão.',
+    gargaloNote:'Atualização: já existe campanha ativa levando pro grupo de WhatsApp (1.904 cliques/30d, R$0,10 cada) — o gargalo pode já estar endereçado tecnicamente, falta confirmar com o cliente se o grupo está sendo trabalhado do outro lado.',
     oportunidade:'Trabalhar ao máximo o posicionamento da marca e lotar os grupos.',
-    proximo:'Implementar uma ação de conversão (oferta) e investigar a queda de alcance.',
+    proximo:'Confirmar com o cliente se o grupo de WhatsApp (que já está recebendo cliques via anúncio) está sendo bem aproveitado do lado comercial.',
     meta:{accountId:'1210611650712369', accountName:'CA - WePink Caxias Shopping', business:'BM We Pink', score:100, topRec:null, lift:0}},
 
   {name:'We Pink Americas', presence:'distante',
@@ -514,31 +504,31 @@ const CLIENTS = [
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 1.200 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:2327, jul:743, cost:0.40},
-      {label:'Mensagens (Meta Ads)', jun:265, jul:122, cost:2.01},
-      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:null, jul:1133, cost:0.15},
+      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:1721, cost:0.27},
+      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:215, cost:2.22},
+      {label:'Cliques p/ grupo de WhatsApp (Meta Ads, 30d)', jun:null, jul:2667, cost:0.14},
     ],
     gargalo:'Falta de acompanhamento real de desempenho de forma palpável.',
     oportunidade:'Estar mais presente para entender esses números junto ao cliente.',
-    proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente; investigar a queda de visitas e mensagens neste ciclo (dado antigo "Leads LP grupo" foi substituído por clique real pro grupo de WhatsApp, não são a mesma métrica).',
+    proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente (dado antigo "Leads LP grupo" foi substituído por clique real pro grupo de WhatsApp, não são a mesma métrica).',
     meta:{accountId:'4161983374048532', accountName:'Sal da Terra CA', business:'Sal Da Terra Sal Da Terra', score:96, topRec:'Combinar 2 conjuntos de anúncios semelhantes (fragmentação)', lift:4}},
 
   {name:'Barra 2', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:153, jul:107, cost:11.61},
+      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:188, cost:13.82},
     ],
     gargalo:'Acompanhamento de vendas reais não acontece.',
     oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
-    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso; orçamento segue limitado em várias campanhas, mas custo por mensagem melhorou (R$15,01 → R$11,61).',
+    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso; orçamento segue limitado em várias campanhas.',
     meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:81, topRec:'Aumentar orçamento de 5 campanhas', lift:10,
       correcao:'⚠️ Conta corrigida em 13/09/2026: a conta usada antes ("Grupo Barra 2" / 1515195049412961, praticamente sem atividade real) estava errada. A conta certa é esta — campanhas ativas por modelo de veículo, otimizando para mensagens no WhatsApp.'}},
 
   {name:'Horto', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 700 Meta + R$ 650 Google',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:589, jul:405, cost:1.73}],
+    metrics:[{label:'Mensagens (Meta Ads, 30d)', jun:null, jul:686, cost:1.63}],
     note:{label:'Faturamento em vendas', text:'Acima de R$ 100 mil em ambos os meses'},
     gargalo:'Sem controle real do retorno em vendas.',
     oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
@@ -739,7 +729,6 @@ function statStrip(){
 let selectedName = CLIENTS[0].name;
 let sortMode = 'healthAsc';
 let searchTerm = '';
-let updatePeriodDays = 15;
 let onlyTrafficDrop = false;
 
 function getSelectedClient(){ return CLIENTS.find(c=>c.name===selectedName) || CLIENTS[0]; }
@@ -1051,30 +1040,6 @@ document.getElementById('searchInput').addEventListener('input', e=>{ searchTerm
 document.getElementById('sortSelect').addEventListener('change', e=>{ sortMode = e.target.value; renderRows(); });
 document.getElementById('quedaTrafegoToggle').addEventListener('change', e=>{ onlyTrafficDrop = e.target.checked; renderRows(); });
 
-document.querySelectorAll('.period-pill').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    updatePeriodDays = btn.dataset.period;
-    document.querySelectorAll('.period-pill').forEach(b=>b.classList.remove('active'));
-    btn.classList.add('active');
-  });
-});
-
-function buildUpdateRequestText(){
-  const contas = CLIENTS.filter(c=>c.meta && c.meta.accountId);
-  const linhas = contas.map(c=>`- ${c.name} (${c.meta.accountId})`).join('\n');
-  const hoje = new Date().toLocaleDateString('pt-BR');
-  return [
-    `Pedido de atualização de dados de tráfego — Termômetro Pra Cima`,
-    `Período solicitado: últimos ${updatePeriodDays} dias`,
-    `Data do pedido: ${hoje}`,
-    ``,
-    `Por favor, puxe via MCP da Meta (Opportunity Score + resultado/custo de campanha) para:`,
-    linhas,
-    ``,
-    `Relação/presença/gargalo eu ajusto manualmente à parte.`,
-  ].join('\n');
-}
-
 async function copyTextViaButton(text, btn){
   const original = btn.textContent;
   try{
@@ -1093,10 +1058,6 @@ async function copyTextViaButton(text, btn){
   }
   setTimeout(()=>{ btn.textContent = original; }, 3500);
 }
-
-document.getElementById('requestUpdateBtn').addEventListener('click', function(){
-  copyTextViaButton(buildUpdateRequestText(), this);
-});
 
 // Pauta do próximo período: junta o "próximo passo" combinado de cada
 // cliente com as notas de reunião registradas neste navegador — tudo

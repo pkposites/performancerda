@@ -338,7 +338,7 @@
   </section>
 
   <div class="footer-bar">
-    <div class="left">Dados de tráfego (Meta Ads) atualizados em 28/09/2026, últimos 30 dias · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
+    <div class="left">Dados de tráfego (Meta Ads) comparando Agosto (01-31) vs Setembro (01-27), atualizados em 28/09/2026 · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
     <div class="nav-arrows">
       <button class="nav-btn" id="prevBtn">← Anterior</button>
       <button class="nav-btn" id="nextBtn">Próximo →</button>
@@ -387,8 +387,8 @@ const CLIENTS = [
     presenceNote:'Não! Tem estado bem afastado ultimamente',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:3601, cost:0.44},
-      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:1865, cost:3.97},
+      {label:'Visitas ao perfil (Meta Ads)', jun:3556, jul:3234, cost:0.44},
+      {label:'Mensagens (Meta Ads)', jun:1651, jul:1617, cost:4.05},
     ],
     gargalo:'Sumiço e falta de companheirismo por parte do cliente.',
     oportunidade:'Se pudéssemos ter mais clareza do resultado, o cliente ficaria mais confortável.',
@@ -399,9 +399,9 @@ const CLIENTS = [
     presenceNote:'Presente, mas um pouco distante nos últimos 15 dias',
     invest:'R$ 6.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:3397, cost:0.45},
-      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:266, cost:27.33},
-      {label:'Tráfego para LP (Meta Ads, 30d)', jun:null, jul:148, cost:0.38},
+      {label:'Visitas ao perfil (Meta Ads)', jun:3787, jul:2964, cost:0.45},
+      {label:'Mensagens (Meta Ads)', jun:194, jul:240, cost:26.49},
+      {label:'Tráfego para LP (Meta Ads)', jun:0, jul:148, cost:0.38},
     ],
     gargalo:'Sem acompanhamento real do processo de vendas e faturamento.',
     oportunidade:'Investimento alto; espaço para ofertas e volume de leads para follow-up/resgate.',
@@ -411,7 +411,7 @@ const CLIENTS = [
   {name:'Vamos Festas', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens (Meta Ads, 30d)', jun:null, jul:178, cost:4.75}],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:199, jul:168, cost:4.58}],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
     proximo:'Propor Google Ads na próxima reunião, formalizar o acompanhamento de fechamentos e resolver a fragmentação de conjuntos que a Meta segue sinalizando (score parado em ~65-70 há dois ciclos).',
@@ -421,20 +421,20 @@ const CLIENTS = [
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:43, cost:12.72},
-      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:402, cost:0.37},
+      {label:'Mensagens (Meta Ads)', jun:82, jul:38, cost:12.56},
+      {label:'Visitas ao perfil (Meta Ads)', jun:573, jul:348, cost:0.37},
     ],
     gargalo:'Sem acompanhamento real do processo de fechamentos.',
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
-    proximo:'Propor Google Ads e uma nova oferta; volume ainda baixo nos últimos 30 dias (43 mensagens) — vale reforçar orçamento, como a própria Meta está sinalizando.',
+    proximo:'Queda real de agosto pra setembro nos dois lados (mensagens 82→38, visitas 573→348) — investigar com urgência antes de propor Google Ads e nova oferta.',
     meta:{accountId:'387692584324747', accountName:'CA - Auditório', business:'Auditorio Edite da Rocha Farias', score:83, topRec:'Aumentar orçamento — conjunto está limitado', lift:10}},
 
   {name:'RR ON Auto', presence:'parcial',
     presenceNote:'Presente somente nas reuniões, na hora do feedback',
     invest:'R$ 1.500 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:456, cost:2.31},
-      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:369, cost:0.48},
+      {label:'Mensagens (Meta Ads)', jun:462, jul:439, cost:2.25},
+      {label:'Visitas ao perfil (Meta Ads)', jun:368, jul:327, cost:0.48},
     ],
     gargalo:null,
     oportunidade:'Ofertas e volume de leads para follow-up/resgate — Google cairia bem.',
@@ -445,8 +445,8 @@ const CLIENTS = [
     presenceNote:'Presente na medida do possível',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:977, cost:0.46},
-      {label:'Leads (Meta Ads, 30d)', jun:null, jul:92, cost:3.69},
+      {label:'Visitas ao perfil (Meta Ads)', jun:0, jul:977, cost:0.46},
+      {label:'Leads (Meta Ads)', jun:0, jul:92, cost:3.69},
     ],
     gargalo:null,
     gargaloNote:'Não considera gargalos atualmente — só precisa estar conectado.',
@@ -458,11 +458,12 @@ const CLIENTS = [
     presenceNote:'Retomando agora',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Engajamento com posts (Meta Ads)', jun:null, jul:44258, cost:0.01},
-      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:1006, cost:0.17},
+      {label:'Engajamento com posts (Meta Ads)', jun:191597, jul:0, cost:null},
+      {label:'Visitas ao perfil (Meta Ads)', jun:1929, jul:0, cost:null},
     ],
-    gargalo:null, oportunidade:null,
-    proximo:'Retomar contato e realinhar objetivos de campanha na volta — a campanha segue ativa e gerando resultado apesar da presença fraca.',
+    gargalo:'Conta ficou totalmente sem gasto/atividade em setembro (0 em todas as campanhas), depois de um agosto ativo — parou de vez, não é só presença fraca.',
+    oportunidade:null,
+    proximo:'Urgente: entender por que a conta zerou o investimento em setembro (estava ativa em agosto, com bom engajamento) antes de qualquer outra ação.',
     meta:{accountId:'1523636822159189', accountName:'CA - Rio Sul Tradição', business:'Rio Sul', score:100, topRec:null, lift:0}},
 
   {name:'Romanella', presence:'retomando',
@@ -485,9 +486,12 @@ const CLIENTS = [
   {name:'We Pink Caxias', presence:'distante',
     presenceNote:'Já foi mais presente; ultimamente tem estado distante',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Cliques p/ grupo de WhatsApp (Meta Ads, 30d)', jun:null, jul:1904, cost:0.10}],
+    metrics:[
+      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:2493, jul:1520, cost:0.10},
+      {label:'Visitas ao perfil (Meta Ads)', jun:298, jul:0, cost:null},
+    ],
     gargalo:'Falta de possibilidade de ações de conversão.',
-    gargaloNote:'Atualização: já existe campanha ativa levando pro grupo de WhatsApp (1.904 cliques/30d, R$0,10 cada) — o gargalo pode já estar endereçado tecnicamente, falta confirmar com o cliente se o grupo está sendo trabalhado do outro lado.',
+    gargaloNote:'Atualização: já existe campanha ativa levando pro grupo de WhatsApp (R$0,10/clique) — o gargalo pode já estar endereçado tecnicamente, falta confirmar com o cliente se o grupo está sendo trabalhado do outro lado. Atenção: cliques caíram de 2.493 (ago) pra 1.520 (set) e a campanha de visita ao perfil parou de rodar em setembro.',
     oportunidade:'Trabalhar ao máximo o posicionamento da marca e lotar os grupos.',
     proximo:'Confirmar com o cliente se o grupo de WhatsApp (que já está recebendo cliques via anúncio) está sendo bem aproveitado do lado comercial.',
     meta:{accountId:'1210611650712369', accountName:'CA - WePink Caxias Shopping', business:'BM We Pink', score:100, topRec:null, lift:0}},
@@ -504,20 +508,20 @@ const CLIENTS = [
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 1.200 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads, 30d)', jun:null, jul:1721, cost:0.27},
-      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:215, cost:2.22},
-      {label:'Cliques p/ grupo de WhatsApp (Meta Ads, 30d)', jun:null, jul:2667, cost:0.14},
+      {label:'Visitas ao perfil (Meta Ads)', jun:1656, jul:1425, cost:0.30},
+      {label:'Mensagens (Meta Ads)', jun:230, jul:202, cost:2.14},
+      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:3190, jul:2339, cost:0.14},
     ],
     gargalo:'Falta de acompanhamento real de desempenho de forma palpável.',
     oportunidade:'Estar mais presente para entender esses números junto ao cliente.',
-    proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente (dado antigo "Leads LP grupo" foi substituído por clique real pro grupo de WhatsApp, não são a mesma métrica).',
+    proximo:'Agendar uma reunião mensal fixa para acompanhar os números junto ao cliente; as três métricas caíram de agosto pra setembro (dado antigo "Leads LP grupo" foi substituído por clique real pro grupo de WhatsApp, não são a mesma métrica).',
     meta:{accountId:'4161983374048532', accountName:'Sal da Terra CA', business:'Sal Da Terra Sal Da Terra', score:96, topRec:'Combinar 2 conjuntos de anúncios semelhantes (fragmentação)', lift:4}},
 
   {name:'Barra 2', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads, 30d)', jun:null, jul:188, cost:13.82},
+      {label:'Mensagens (Meta Ads)', jun:197, jul:171, cost:13.42},
     ],
     gargalo:'Acompanhamento de vendas reais não acontece.',
     oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
@@ -528,7 +532,7 @@ const CLIENTS = [
   {name:'Horto', presence:'presente',
     presenceNote:'Segue na mesma presença normal',
     invest:'R$ 700 Meta + R$ 650 Google',
-    metrics:[{label:'Mensagens (Meta Ads, 30d)', jun:null, jul:686, cost:1.63}],
+    metrics:[{label:'Mensagens (Meta Ads)', jun:575, jul:627, cost:1.64}],
     note:{label:'Faturamento em vendas', text:'Acima de R$ 100 mil em ambos os meses'},
     gargalo:'Sem controle real do retorno em vendas.',
     oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
@@ -537,15 +541,15 @@ const CLIENTS = [
 
   {name:'Igor Gringo', presence:'retomando',
     presenceNote:'Cliente novo na carteira — ainda sem leitura de relação/presença, aguardando primeira reunião de alinhamento.',
-    invest:'~R$ 4.000 Meta/mês (não anuncia no Google)',
+    invest:'~R$ 400 Meta/dia em agosto → ~R$ 12.000/mês em setembro (ramp-up forte, não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:null, jul:4621, cost:0.31},
-      {label:'Engajamento com posts (Meta Ads)', jun:null, jul:106925, cost:0.01},
+      {label:'Visitas ao perfil (Meta Ads)', jun:1196, jul:11831, cost:0.50},
+      {label:'Engajamento com posts (Meta Ads)', jun:32122, jul:180568, cost:0.01},
     ],
     gargalo:null,
     gargaloNote:'Cliente novo — gargalo ainda não mapeado.',
-    oportunidade:'Conta com bom orçamento e forte engajamento orgânico via anúncio; hoje só reconhecimento/engajamento — espaço para evoluir para geração de mensagens/leads.',
-    proximo:'Fazer reunião de abertura, registrar presença/gargalo e definir um objetivo comercial (mensagens ou leads) além de reconhecimento.',
+    oportunidade:'Investimento disparou de agosto pra setembro (quase 18x mais gasto, visitas +889%, engajamento +462%) — hoje só reconhecimento/engajamento; com esse orçamento, vale muito a pena evoluir para geração de mensagens/leads.',
+    proximo:'Fazer reunião de abertura, entender o motivo do salto grande de investimento em setembro, registrar presença/gargalo e definir um objetivo comercial (mensagens ou leads) além de reconhecimento.',
     meta:{accountId:'1419457343463109', accountName:'CA - Igor Gringo [Partido]', business:'CACS', score:100, topRec:null, lift:0}},
 ];
 

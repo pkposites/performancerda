@@ -360,7 +360,8 @@ const CLIENTS = [
     gargalo:'Falta de relação de parceria — contato quase só acontece pra reclamar, sem abertura pra ajuste colaborativo.',
     oportunidade:'Reaproximação + melhorar a mensuração de resultados pra mostrar objetivamente o que está funcionando.',
     proximo:'Cliente pediu recentemente uma mudança estrutural grande na campanha pra reduzir gasto — aguardar alguns dias pra medir o efeito real antes de qualquer nova conversa, e usar isso como gancho pra reaproximação.',
-    meta:{accountId:'1660608817357420', accountName:'CA - Duque de Caxias', business:'RedeBr Telecom', score:91, topRec:'Testar campanha de mensagens personalizada com Advantage+', lift:5}},
+    meta:{accountId:'1660608817357420', accountName:'CA - Duque de Caxias', business:'RedeBr Telecom', score:91, topRec:'Testar campanha de mensagens personalizada com Advantage+', lift:5},
+    google:{spend:2108.53, conversions:1644, note:'Últimos 30 dias — confere com o investimento informado (R$ 2.000/mês). Campanha "Marca Redebr" é a que mais converte; "Ofertas Serviços" tem o maior gasto isolado.'}},
 
   {name:'Vamos Festas', presence:'parcial',
     presenceNote:'Dentro do guarda-chuva da Mega, sem alinhamento frequente próprio, mas sob supervisão constante da agência.',
@@ -490,8 +491,9 @@ const CLIENTS = [
     note:{label:'Faturamento em vendas', text:'Acima de R$ 100 mil em ambos os meses'},
     gargalo:'Sinal de atenção — percepção de abalo interno entre os sócios/família do cliente. Nada afetou a conta ainda, mas é um risco real a monitorar.',
     oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
-    proximo:'Manter atenção redobrada à relação por conta do abalo interno percebido, além de seguir buscando o dado de vendas pro case oficial.',
-    meta:{accountId:'1138519810136500', accountName:'Horto Grande Rio', business:'Horto Grande Rio', score:91, topRec:'Otimizar criativos com melhorias Advantage+', lift:6}},
+    proximo:'Manter atenção redobrada à relação por conta do abalo interno percebido, além de seguir buscando o dado de vendas pro case oficial. Conta Google encontrada no painel está com todas as campanhas pausadas e zero gasto nos últimos 30 dias — confirmar com o cliente se os R$ 650 Google ainda estão ativos em outra conta, ou se o investimento migrou só pra Meta.',
+    meta:{accountId:'1138519810136500', accountName:'Horto Grande Rio', business:'Horto Grande Rio', score:91, topRec:'Otimizar criativos com melhorias Advantage+', lift:6},
+    google:{spend:0, conversions:0, note:'⚠️ Conta "Horto Grande Rio (Conta Antiga)" no Google Ads — todas as campanhas pausadas, zero gasto e zero impressão nos últimos 30 dias. Pode ser conta legada; vale confirmar se existe uma conta Google ativa diferente.'}},
 
   {name:'Santorini', presence:'retomando',
     presenceNote:'Cliente novo na carteira — acesso à conta localizado automaticamente via Meta; relação/gargalo ainda a mapear com o responsável.',
@@ -870,6 +872,20 @@ function renderMetaCard(meta){
     </div>`;
 }
 
+function renderGoogleCard(google){
+  if(!google) return '';
+  const alert = google.spend === 0;
+  return `
+    <div class="meta-card" style="${alert ? 'border-color:var(--amber);' : ''}">
+      <span class="icon-round" style="width:32px;height:32px;background:${alert ? 'var(--amber-bg)' : 'var(--blue-bg)'};color:${alert ? 'var(--amber)' : 'var(--blue)'};flex-shrink:0;">${ICON.target}</span>
+      <div class="meta-info">
+        <div class="acc-name">Google Ads — últimos 30 dias</div>
+        <div class="acc-sub">Gasto: R$ ${google.spend.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})} · Conversões: ${fmtNum(Math.round(google.conversions))}</div>
+        <div class="top-rec">${google.note}</div>
+      </div>
+    </div>`;
+}
+
 // ------------------------------------------------------------------
 // NOTAS DE REUNIÃO — registradas pela equipe a cada ciclo, viram a
 // pauta de "combinado para o próximo período". Guardadas neste
@@ -939,6 +955,7 @@ function renderDetail(){
     : `<p>Ainda sem oportunidade registrada — conta em retomada.</p>`;
 
   const metaHtml = renderMetaCard(c.meta);
+  const googleHtml = renderGoogleCard(c.google);
 
   const trend = metricTrend(c);
   const trendPill = trend===null ? '' : trend>=0
@@ -972,6 +989,7 @@ function renderDetail(){
     ${commAlertHtml}
 
     ${metaHtml}
+    ${googleHtml}
 
     <div class="info-card" style="margin-bottom:16px;">
       <div class="eyebrow"><span class="icon-round" style="width:18px;height:18px;background:var(--violet-bg);color:var(--violet);">${ICON.users}</span>Presença do cliente</div>

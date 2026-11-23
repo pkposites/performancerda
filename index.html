@@ -411,17 +411,18 @@ const CLIENTS = [
     proximo:'Acompanhar de perto o resultado do realinhamento de estrutura feito na última reunião; bom case pra citar na reunião pelo feedback positivo de vendas.',
     meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:94, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:2}},
 
-  {name:'Plasart', presence:'parcial', delicado:true,
-    trendOverride:'stable', // ficou inativa um bom tempo (jun=0) antes da campanha nichada atual — a queda vs. julho é artefato desse período parado, não saúde real do cliente agora.
-    presenceNote:'Sem mudança na relação com a agência, mas o comercial do lado do cliente está preocupando.',
+  {name:'Plasart', presence:'presente',
+    trendOverride:'stable', // ficou com o tráfego pausado um bom tempo (jun=0) por questão estrutural da empresa, não por problema de relação — a queda vs. julho é artefato desse período parado.
+    presenceNote:'Comunicação e reuniões seguiram normais o período todo. A arte/tráfego ficou pausada por questão estrutural da empresa do cliente, não por problema com a agência — sem queixas dos dois lados durante a pausa.',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
       {label:'Visitas ao perfil (Meta Ads)', ago:2993, jun:0, jul:977, cost:0.46},
       {label:'Leads (Meta Ads)', ago:null, jun:0, jul:92, cost:3.69},
     ],
-    gargalo:'Comercial do cliente parece desengajado/sem ambição de fechamento — risco de desperdiçar os leads que a nova campanha nichada está gerando.',
-    oportunidade:'Nova estratégia de leads nichados rodando bem (92 leads no ciclo) — só falta o comercial abraçar de verdade.',
-    proximo:'Marcar reunião pra alinhar os passos do próximo mês até o fim do ano; acompanhar de perto se os leads estão virando fechamento. Score Meta caiu de 100 para 80 por fragmentação de conjuntos — resolver.',
+    gargalo:null,
+    gargaloNote:'Pausa do tráfego foi questão estrutural da empresa do cliente (não da relação) — já retomado com a campanha nichada de leads, rodando bem.',
+    oportunidade:'Nova estratégia de leads nichados rodando bem (92 leads no ciclo) agora que o tráfego foi retomado.',
+    proximo:'Acompanhar se os leads da campanha nichada estão virando fechamento, já que a relação e a comunicação seguem normais. Score Meta caiu de 100 para 80 por fragmentação de conjuntos — resolver.',
     meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:80, topRec:'Combinar conjuntos de anúncios semelhantes (fragmentação)', lift:5}},
 
   {name:'RioSul Tradição', presence:'presente', delicado:true,

@@ -579,10 +579,32 @@ function metricTrend(client){
 // Termômetro (que usa metricTrend, 2 meses) nem muda nenhum score.
 function trend3m(client){
   if(!client.metrics.length) return null;
+  // Soma volume em vez de média de percentuais — uma métrica com base muito
+  // pequena num mês atípico (pouco criativo no ar, promoção pontual etc.)
+  // não pode sozinha virar um +600% ou -90% de "tendência".
   const withAgo = client.metrics.filter(m=>typeof m.ago === 'number' && m.ago > 0);
   if(!withAgo.length) return null;
-  const deltas = withAgo.map(m=>((m.jul-m.ago)/m.ago)*100);
-  return deltas.reduce((a,b)=>a+b,0)/deltas.length;
+  const sumAgo = withAgo.reduce((a,m)=>a+m.ago,0);
+  const sumJul = withAgo.reduce((a,m)=>a+m.jul,0);
+  if(sumAgo <= 0) return null;
+  return ((sumJul-sumAgo)/sumAgo)*100;
+}
+
+// Indicador de tendência mostrado pro usuário (badges ▲/▼ nos cards).
+// Usa a janela de 3 meses quando disponível (menos sensível a ruído de um
+// único mês — leilão, criativo, promoção pontual etc. pesam menos numa
+// janela maior) e tem uma faixa neutra: variação pequena não é "queda" nem
+// "crescimento", é estabilidade. Não alimenta o Termômetro — só exibição.
+function displayTrend(client){
+  const t = trend3m(client);
+  const raw = t !== null ? t : metricTrend(client);
+  if(raw === null) return null;
+  const dir = raw > 12 ? 'up' : raw < -12 ? 'down' : 'stable';
+  // Um mês com base muito baixa (pouco investimento, promoção pontual) pode
+  // gerar um percentual gigante que não representa saúde real do cliente —
+  // mostra o sinal certo, mas sem número exagerado.
+  const pct = Math.max(-95, Math.min(150, raw));
+  return {pct, dir};
 }
 
 function hasSalesData(client){
@@ -773,10 +795,12 @@ function renderRows(){
       ? `${mainMetric.label}: ${fmtNum(mainMetric.jul)}`
       : (c.note ? c.note.text : 'Sem atividade');
     const scoreBadge = `<span class="presence-tag" style="color:${h.color};background:${h.bg}" title="Termômetro (Relação ${term.relacao} · Tráfego ${term.trafego})">${term.total}</span>`;
-    const trend = metricTrend(c);
-    const trendBadge = trend===null ? '' : trend>=0
-      ? `<span class="presence-tag" style="color:var(--green);background:var(--green-bg);" title="Tendência de tráfego no período">▲ ${Math.round(trend)}%</span>`
-      : `<span class="presence-tag" style="color:var(--red);background:var(--red-bg);" title="Tendência de tráfego no período">▼ ${Math.round(Math.abs(trend))}%</span>`;
+    const trend = displayTrend(c);
+    const trendBadge = !trend ? '' : trend.dir==='stable'
+      ? `<span class="presence-tag" style="color:var(--teal);background:var(--teal-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">● Estável</span>`
+      : trend.dir==='up'
+      ? `<span class="presence-tag" style="color:var(--green);background:var(--green-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▲ ${Math.round(trend.pct)}%</span>`
+      : `<span class="presence-tag" style="color:var(--red);background:var(--red-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▼ ${Math.round(Math.abs(trend.pct))}%</span>`;
     return `
       <div class="row ${c.name===selectedName?'selected':''}" data-name="${c.name}">
         <div class="row-name">
@@ -957,10 +981,12 @@ function renderDetail(){
   const metaHtml = renderMetaCard(c.meta);
   const googleHtml = renderGoogleCard(c.google);
 
-  const trend = metricTrend(c);
-  const trendPill = trend===null ? '' : trend>=0
-    ? `<span class="health-pill" style="color:var(--green);background:var(--green-bg);margin-left:6px;">▲ Crescimento ${Math.round(trend)}%</span>`
-    : `<span class="health-pill" style="color:var(--red);background:var(--red-bg);margin-left:6px;">▼ Queda ${Math.round(Math.abs(trend))}%</span>`;
+  const trend = displayTrend(c);
+  const trendPill = !trend ? '' : trend.dir==='stable'
+    ? `<span class="health-pill" style="color:var(--teal);background:var(--teal-bg);margin-left:6px;" title="Considerando a trajetória do cliente, não só o último mês">● Estável</span>`
+    : trend.dir==='up'
+    ? `<span class="health-pill" style="color:var(--green);background:var(--green-bg);margin-left:6px;" title="Considerando a trajetória do cliente, não só o último mês">▲ Crescimento ${Math.round(trend.pct)}%</span>`
+    : `<span class="health-pill" style="color:var(--red);background:var(--red-bg);margin-left:6px;" title="Considerando a trajetória do cliente, não só o último mês">▼ Queda ${Math.round(Math.abs(trend.pct))}%</span>`;
 
   const commIssue = communicationIssue(c);
   const commAlertHtml = commIssue

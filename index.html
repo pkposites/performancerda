@@ -397,6 +397,7 @@ const CLIENTS = [
     meta:{accountId:'1126270709009792', accountName:'RRon', business:'RR On', score:94, topRec:'Configurar eventos de compra via mensagens (WhatsApp)', lift:2}},
 
   {name:'Plasart', presence:'parcial', delicado:true,
+    trendOverride:'stable', // ficou inativa um bom tempo (jun=0) antes da campanha nichada atual — a queda vs. julho é artefato desse período parado, não saúde real do cliente agora.
     presenceNote:'Sem mudança na relação com a agência, mas o comercial do lado do cliente está preocupando.',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
@@ -409,6 +410,7 @@ const CLIENTS = [
     meta:{accountId:'1168607404777973', accountName:'CA - Plasart new', business:'Plasart Distribuidora e Marca', score:80, topRec:'Combinar conjuntos de anúncios semelhantes (fragmentação)', lift:5}},
 
   {name:'RioSul Tradição', presence:'presente', delicado:true,
+    trendOverride:'stable', // conta inativa por decisão combinada — queda vs. período anterior não é saúde real, é o modelo de trabalhos pontuais já acordado.
     presenceNote:'Relação boa e alinhada, equipe toda ciente do formato de trabalhos pontuais.',
     invest:'Conta inativa — sem investimento mensal fixo, só campanhas pontuais conforme demanda (Meta, não anuncia no Google)',
     metrics:[
@@ -596,6 +598,10 @@ function trend3m(client){
 // janela maior) e tem uma faixa neutra: variação pequena não é "queda" nem
 // "crescimento", é estabilidade. Não alimenta o Termômetro — só exibição.
 function displayTrend(client){
+  // Override manual pra conta que ficou inativa por um bom tempo — o
+  // percentual bruto compararia um período parado com a retomada e
+  // mostraria queda, o que não reflete a saúde real do cliente agora.
+  if(client.trendOverride) return {pct:0, dir:client.trendOverride};
   const t = trend3m(client);
   const raw = t !== null ? t : metricTrend(client);
   if(raw === null) return null;

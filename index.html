@@ -43,8 +43,9 @@
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(1200px 600px at 8% -10%, rgba(123,92,217,.07), transparent 60%),
-      radial-gradient(900px 500px at 100% 0%, rgba(59,115,240,.06), transparent 55%),
+      radial-gradient(1200px 700px at 8% -10%, rgba(123,92,217,.16), transparent 62%),
+      radial-gradient(1000px 600px at 100% 0%, rgba(59,115,240,.14), transparent 58%),
+      radial-gradient(900px 700px at 50% 120%, rgba(31,168,154,.08), transparent 60%),
       var(--bg);
     color:var(--text);
     font-family:'Inter',-apple-system,BlinkMacSystemFont,sans-serif;
@@ -116,6 +117,8 @@
   .row:last-child{border-bottom:none;}
   .row:hover{background:var(--bg-soft);}
   .row.selected{background:var(--green-bg);}
+  .row.saindo{background:repeating-linear-gradient(135deg, var(--amber-bg) 0 10px, #fff 10px 20px);}
+  .row.saindo.selected{background:var(--amber-bg);}
   .row-name{display:flex;align-items:center;gap:10px;min-width:0;}
   .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
   .row-name b{font-size:13.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -290,6 +293,8 @@
   </div>
 
   <div id="statStrip"></div>
+
+  <div id="gargaloGeralBanner"></div>
 
   <!-- CONTROLES -->
   <div class="list-card" style="padding:16px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:flex-end;">
@@ -498,7 +503,7 @@ const CLIENTS = [
       {label:'Mensagens (Meta Ads)', ago:221, jun:197, jul:171, cost:13.42},
     ],
     gargalo:null,
-    gargaloNote:'Nenhum do lado da agência — a saída é por decisão interna da empresa do cliente, resultado e relação continuam bons até o fim.',
+    gargaloNote:'Nenhum do lado da agência — leitura de mercado: fechamento de ciclo no fim de ano, somado à confusão geral que o movimento de IA está causando em muita empresa pequena. Resultado e relação continuam bons até o fim.',
     oportunidade:'Bom case de vendas pra documentar antes do encerramento, já que o resultado foi muito bom enquanto durou.',
     proximo:'Acompanhar o processo de encerramento combinado com o cliente; aproveitar pra registrar o case de sucesso em vendas antes de sair.',
     meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:81, topRec:'Aumentar orçamento de 5 campanhas', lift:10,
@@ -722,6 +727,26 @@ function avgThermometer(){
   return Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
 }
 
+// Gargalo geral da carteira — fixo, não calculado por cliente: comunicação
+// segue sendo o maior gargalo do dia a dia da agência, e a saída repentina
+// de alguns clientes neste fim de ano é leitura de mercado (fechamento de
+// ciclo + confusão generalizada com o movimento de IA), não falha nossa.
+function renderGargaloGeral(){
+  const el = document.getElementById('gargaloGeralBanner');
+  const saindo = CLIENTS.filter(c=>c.saindo);
+  const saindoTxt = saindo.length
+    ? ` Neste momento, ${saindo.length} cliente${saindo.length>1?'s':''} (${saindo.map(c=>c.name).join(', ')}) está${saindo.length>1?'ão':''} de saída — leitura de mercado (fim de ano + confusão geral com o movimento de IA), não sinal de insatisfação com a agência.`
+    : '';
+  el.innerHTML = `
+    <div class="meta-insight-banner" style="border-color:rgba(217,154,31,.3);background:linear-gradient(135deg, var(--amber-bg) 0%, #fff 70%);margin-bottom:18px;">
+      <span class="icon-round" style="width:32px;height:32px;background:var(--amber-bg);color:var(--amber);flex-shrink:0;">${ICON.alert}</span>
+      <div>
+        <h4>Gargalo geral da carteira: comunicação</h4>
+        <p>Comunicação com os clientes continua sendo o maior gargalo do dia a dia da agência — é o que mais aparece puxando o score de Relação pra baixo em toda a carteira.${saindoTxt}</p>
+      </div>
+    </div>`;
+}
+
 function statStrip(){
   const total = CLIENTS.length;
   const retomando = CLIENTS.filter(c=>c.presence==='retomando').length;
@@ -828,7 +853,7 @@ function renderRows(){
       ? `<span class="presence-tag" style="color:var(--green);background:var(--green-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▲ ${Math.round(trend.pct)}%</span>`
       : `<span class="presence-tag" style="color:var(--red);background:var(--red-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▼ ${Math.round(Math.abs(trend.pct))}%</span>`;
     return `
-      <div class="row ${c.name===selectedName?'selected':''}" data-name="${c.name}">
+      <div class="row ${c.name===selectedName?'selected':''} ${c.saindo?'saindo':''}" data-name="${c.name}">
         <div class="row-name">
           <span class="dot" style="background:${h.color}"></span>
           <b>${c.name}</b>
@@ -1138,6 +1163,7 @@ document.getElementById('generateAgendaBtn').addEventListener('click', function(
 // ------------------------------------------------------------------
 selectedName = sortedFilteredClients()[0].name;
 statStrip();
+renderGargaloGeral();
 renderRows();
 renderDetail();
 </script>

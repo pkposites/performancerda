@@ -309,7 +309,7 @@
   </section>
 
   <div class="footer-bar">
-    <div class="left">Dados de tráfego (Meta Ads) comparando Agosto (01-31) vs Setembro (01-27), atualizados em 28/09/2026 · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
+    <div class="left">Dados de tráfego (Meta Ads) — últimos 3 meses com histórico (Jul → Ago → Set) nos clientes com essa trajetória na agência · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
   </div>
 
 </div>
@@ -354,8 +354,8 @@ const CLIENTS = [
     presenceNote:'Aparecem só em momentos de atrito/reclamação — tratam a agência como adversária, não como parceira.',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:3556, jul:3234, cost:0.44},
-      {label:'Mensagens (Meta Ads)', jun:1651, jul:1617, cost:4.05},
+      {label:'Visitas ao perfil (Meta Ads)', ago:2825, jun:3556, jul:3234, cost:0.44},
+      {label:'Mensagens (Meta Ads)', ago:760, jun:1651, jul:1617, cost:4.05},
     ],
     gargalo:'Falta de relação de parceria — contato quase só acontece pra reclamar, sem abertura pra ajuste colaborativo.',
     oportunidade:'Reaproximação + melhorar a mensuração de resultados pra mostrar objetivamente o que está funcionando.',
@@ -365,7 +365,7 @@ const CLIENTS = [
   {name:'Vamos Festas', presence:'parcial',
     presenceNote:'Dentro do guarda-chuva da Mega, sem alinhamento frequente próprio, mas sob supervisão constante da agência.',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:199, jul:168, cost:4.58}],
+    metrics:[{label:'Mensagens (Meta Ads)', ago:260, jun:199, jul:168, cost:4.58}],
     gargalo:'Falta de curadoria de criativos que convertem — ligado às dificuldades de fechamento reportadas recentemente (pode ser oscilação pontual do segmento).',
     oportunidade:'Conta de geração de demanda com meta de evolução mês a mês — espaço pra melhorar resultado com curadoria melhor de criativo.',
     proximo:'Fazer a curadoria de criativos que convertem; acompanhar se a dificuldade de fechamento é oscilação pontual ou tendência real. Score Meta ainda sinaliza fragmentação de conjuntos a resolver.',
@@ -375,8 +375,8 @@ const CLIENTS = [
     presenceNote:'Mesma gestão e mesma pessoa representando a empresa do Vamos Festas — sem alinhamento frequente próprio, sob supervisão constante da agência.',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:82, jul:38, cost:12.56},
-      {label:'Visitas ao perfil (Meta Ads)', jun:573, jul:348, cost:0.37},
+      {label:'Mensagens (Meta Ads)', ago:71, jun:82, jul:38, cost:12.56},
+      {label:'Visitas ao perfil (Meta Ads)', ago:26, jun:573, jul:348, cost:0.37},
     ],
     gargalo:'Falta de curadoria de criativos que convertem.',
     oportunidade:'Conta sob supervisão constante pra evolução mês a mês.',
@@ -387,8 +387,8 @@ const CLIENTS = [
     presenceNote:'Acompanhamento mais próximo — atendentes e gerente dão feedback direto sobre as campanhas, ainda que dentro da rede da Mega.',
     invest:'R$ 1.500 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:462, jul:439, cost:2.25},
-      {label:'Visitas ao perfil (Meta Ads)', jun:368, jul:327, cost:0.48},
+      {label:'Mensagens (Meta Ads)', ago:602, jun:462, jul:439, cost:2.25},
+      {label:'Visitas ao perfil (Meta Ads)', ago:17, jun:368, jul:327, cost:0.48},
     ],
     gargalo:null,
     oportunidade:'Estrutura de campanha foi recentemente realinhada em reunião — espaço pra capturar ganho de performance dessa otimização.',
@@ -399,8 +399,8 @@ const CLIENTS = [
     presenceNote:'Sem mudança na relação com a agência, mas o comercial do lado do cliente está preocupando.',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:0, jul:977, cost:0.46},
-      {label:'Leads (Meta Ads)', jun:0, jul:92, cost:3.69},
+      {label:'Visitas ao perfil (Meta Ads)', ago:2993, jun:0, jul:977, cost:0.46},
+      {label:'Leads (Meta Ads)', ago:null, jun:0, jul:92, cost:3.69},
     ],
     gargalo:'Comercial do cliente parece desengajado/sem ambição de fechamento — risco de desperdiçar os leads que a nova campanha nichada está gerando.',
     oportunidade:'Nova estratégia de leads nichados rodando bem (92 leads no ciclo) — só falta o comercial abraçar de verdade.',
@@ -411,8 +411,8 @@ const CLIENTS = [
     presenceNote:'Relação boa e alinhada, equipe toda ciente do formato de trabalhos pontuais.',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Engajamento com posts (Meta Ads)', jun:191597, jul:0, cost:null},
-      {label:'Visitas ao perfil (Meta Ads)', jun:1929, jul:0, cost:null},
+      {label:'Engajamento com posts (Meta Ads)', ago:null, jun:191597, jul:0, cost:null},
+      {label:'Visitas ao perfil (Meta Ads)', ago:null, jun:1929, jul:0, cost:null},
     ],
     gargalo:null,
     gargaloNote:'O "zero" de setembro foi decisão combinada, não sumiço — já foi feito um realinhamento e o cliente prefere trabalhos pontuais em vez de campanha contínua.',
@@ -441,8 +441,8 @@ const CLIENTS = [
     presenceNote:'Relação com o cliente segue tudo ok.',
     invest:'R$ 1.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:2493, jul:1520, cost:0.10},
-      {label:'Visitas ao perfil (Meta Ads)', jun:298, jul:0, cost:null},
+      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', ago:1171, jun:2493, jul:1520, cost:0.10},
+      {label:'Visitas ao perfil (Meta Ads)', ago:null, jun:298, jul:0, cost:null},
     ],
     gargalo:'Restrição técnica na página que leva as pessoas pro grupo de WhatsApp — explica a queda de cliques do ciclo; aguardando novos criativos pra retomar outras frentes (visita ao perfil, reforço de marca).',
     oportunidade:'Assim que os criativos novos chegarem, retomar campanha normalmente nas outras frentes.',
@@ -462,9 +462,9 @@ const CLIENTS = [
     presenceNote:'Segue trabalho de reforço de marca, visita ao perfil, divulgação de promoções.',
     invest:'R$ 1.200 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Visitas ao perfil (Meta Ads)', jun:1656, jul:1425, cost:0.30},
-      {label:'Mensagens (Meta Ads)', jun:230, jul:202, cost:2.14},
-      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', jun:3190, jul:2339, cost:0.14},
+      {label:'Visitas ao perfil (Meta Ads)', ago:1493, jun:1656, jul:1425, cost:0.30},
+      {label:'Mensagens (Meta Ads)', ago:257, jun:230, jul:202, cost:2.14},
+      {label:'Cliques p/ grupo de WhatsApp (Meta Ads)', ago:2576, jun:3190, jul:2339, cost:0.14},
     ],
     gargalo:'Fechamento do mês passado ficou no vermelho — preocupante; hoje os leads vão direto pro WhatsApp sem qualificação nem captura de dado, perdendo controle sobre eles.',
     oportunidade:'Montar uma landing page de qualificação (atacado ou varejo) antes do redirecionamento pro WhatsApp — os leads ficam guardados numa ferramenta própria pra trabalhar depois, em vez de se perderem.',
@@ -475,7 +475,7 @@ const CLIENTS = [
     presenceNote:'Relação segue tudo ok, mesmo projeto.',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
-      {label:'Mensagens (Meta Ads)', jun:197, jul:171, cost:13.42},
+      {label:'Mensagens (Meta Ads)', ago:221, jun:197, jul:171, cost:13.42},
     ],
     gargalo:'Acompanhamento de vendas reais não acontece.',
     oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
@@ -486,7 +486,7 @@ const CLIENTS = [
   {name:'Horto', presence:'presente', delicado:true,
     presenceNote:'Segue rodando bem na estratégia e no contrato.',
     invest:'R$ 700 Meta + R$ 650 Google',
-    metrics:[{label:'Mensagens (Meta Ads)', jun:575, jul:627, cost:1.64}],
+    metrics:[{label:'Mensagens (Meta Ads)', ago:465, jun:575, jul:627, cost:1.64}],
     note:{label:'Faturamento em vendas', text:'Acima de R$ 100 mil em ambos os meses'},
     gargalo:'Sinal de atenção — percepção de abalo interno entre os sócios/família do cliente. Nada afetou a conta ainda, mas é um risco real a monitorar.',
     oportunidade:'Já é um grande case — falta apenas esse acompanhamento.',
@@ -570,6 +570,16 @@ function metricTrend(client){
     .filter(m=>typeof m.jun === 'number' && m.jun > 0)
     .map(m=>((m.jul-m.jun)/m.jun)*100);
   if(!deltas.length) return null;
+  return deltas.reduce((a,b)=>a+b,0)/deltas.length;
+}
+
+// Tendência de 3 meses (Jul→Ago→Set) — só informativa, não entra no
+// Termômetro (que usa metricTrend, 2 meses) nem muda nenhum score.
+function trend3m(client){
+  if(!client.metrics.length) return null;
+  const withAgo = client.metrics.filter(m=>typeof m.ago === 'number' && m.ago > 0);
+  if(!withAgo.length) return null;
+  const deltas = withAgo.map(m=>((m.jul-m.ago)/m.ago)*100);
   return deltas.reduce((a,b)=>a+b,0)/deltas.length;
 }
 
@@ -785,6 +795,18 @@ function renderRows(){
   });
 }
 
+function sparkline3m(m){
+  const hasAgo = typeof m.ago === 'number';
+  if(!hasAgo) return '';
+  const pts = [m.ago, m.jun, m.jul];
+  const max = Math.max(...pts, 1);
+  const w = 54, h = 20, step = w/2;
+  const coords = pts.map((v,i)=>`${i*step},${h-(v/max)*h}`).join(' ');
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" style="flex-shrink:0;">
+    <polyline points="${coords}" fill="none" stroke="var(--blue)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+  </svg>`;
+}
+
 function metricCard(m){
   const hasJun = m.jun !== null && m.jun !== undefined;
   const d = computeDelta(m.jun, m.jul);
@@ -794,11 +816,18 @@ function metricCard(m){
   const subTxt = hasJun
     ? `Agosto: <span class="num">${fmtNum(m.jun)}</span> &nbsp;${deltaTxt} ${costTxt}`
     : `Métrica nova neste ciclo ${costTxt}`;
+  const agoTxt = (typeof m.ago === 'number')
+    ? `<div class="sub" style="margin-top:2px;color:var(--text-faint);">Julho: <span class="num">${fmtNum(m.ago)}</span> · últimos 3 meses</div>`
+    : '';
   return `
     <div class="metric-card">
-      <div class="eyebrow"><span class="icon-dot" style="background:var(--blue-bg);color:var(--blue);">${ICON.target}</span>${m.label}</div>
+      <div class="eyebrow" style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+        <span style="display:flex;align-items:center;"><span class="icon-dot" style="background:var(--blue-bg);color:var(--blue);">${ICON.target}</span>${m.label}</span>
+        ${sparkline3m(m)}
+      </div>
       <div class="val num">${fmtNum(m.jul)}</div>
       <div class="sub">${subTxt}</div>
+      ${agoTxt}
     </div>
   `;
 }

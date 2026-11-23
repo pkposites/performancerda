@@ -491,15 +491,16 @@ const CLIENTS = [
     proximo:'Implementar essa landing page de qualificação e captura de lead antes do envio pro WhatsApp, aproveitando o momento bom da relação. As três métricas de tráfego caíram de agosto pra setembro (dado antigo "Leads LP grupo" foi substituído por clique real pro grupo de WhatsApp, não são a mesma métrica).',
     meta:{accountId:'4161983374048532', accountName:'Sal da Terra CA', business:'Sal Da Terra Sal Da Terra', score:96, topRec:'Combinar 2 conjuntos de anúncios semelhantes (fragmentação)', lift:4}},
 
-  {name:'Barra 2', presence:'presente',
-    presenceNote:'Relação segue tudo ok, mesmo projeto.',
+  {name:'Barra 2', presence:'presente', saindo:true,
+    presenceNote:'Relação segue tudo ok, resultado muito bom — principalmente em vendas. Cliente está de saída por decisão interna da empresa deles, não por insatisfação com a agência ou com o resultado.',
     invest:'R$ 2.000 Meta (não anuncia no Google)',
     metrics:[
       {label:'Mensagens (Meta Ads)', ago:221, jun:197, jul:171, cost:13.42},
     ],
-    gargalo:'Acompanhamento de vendas reais não acontece.',
-    oportunidade:'Com esse acompanhamento, pode se tornar um grande case.',
-    proximo:'Propor a captura de dado de vendas para transformar a conta em case de sucesso; orçamento segue limitado em várias campanhas.',
+    gargalo:null,
+    gargaloNote:'Nenhum do lado da agência — a saída é por decisão interna da empresa do cliente, resultado e relação continuam bons até o fim.',
+    oportunidade:'Bom case de vendas pra documentar antes do encerramento, já que o resultado foi muito bom enquanto durou.',
+    proximo:'Acompanhar o processo de encerramento combinado com o cliente; aproveitar pra registrar o case de sucesso em vendas antes de sair.',
     meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:81, topRec:'Aumentar orçamento de 5 campanhas', lift:10,
       correcao:'⚠️ Conta corrigida em 13/09/2026: a conta usada antes ("Grupo Barra 2" / 1515195049412961, praticamente sem atividade real) estava errada. A conta certa é esta — campanhas ativas por modelo de veículo, otimizando para mensagens no WhatsApp.'}},
 
@@ -622,7 +623,9 @@ function displayTrend(client){
   const t = trend3m(client);
   const raw = t !== null ? t : metricTrend(client);
   if(raw === null) return null;
-  const dir = raw > 12 ? 'up' : raw < -12 ? 'down' : 'stable';
+  // Só marca "queda" de verdade a partir de -30% — abaixo disso é ruído
+  // normal (leilão, criativo, sazonalidade) e fica neutro/cinza.
+  const dir = raw > 12 ? 'up' : raw < -30 ? 'down' : 'stable';
   // Um mês com base muito baixa (pouco investimento, promoção pontual) pode
   // gerar um percentual gigante que não representa saúde real do cliente —
   // mostra o sinal certo, mas sem número exagerado.
@@ -820,7 +823,7 @@ function renderRows(){
     const scoreBadge = `<span class="presence-tag" style="color:${h.color};background:${h.bg}" title="Termômetro (Relação ${term.relacao} · Tráfego ${term.trafego})">${term.total}</span>`;
     const trend = displayTrend(c);
     const trendBadge = !trend ? '' : trend.dir==='stable'
-      ? `<span class="presence-tag" style="color:var(--teal);background:var(--teal-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">● Estável</span>`
+      ? `<span class="presence-tag" style="color:var(--text-soft);background:var(--bg-soft);" title="Tendência considerando a trajetória do cliente, não só o último mês">● Estável</span>`
       : trend.dir==='up'
       ? `<span class="presence-tag" style="color:var(--green);background:var(--green-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▲ ${Math.round(trend.pct)}%</span>`
       : `<span class="presence-tag" style="color:var(--red);background:var(--red-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▼ ${Math.round(Math.abs(trend.pct))}%</span>`;
@@ -829,6 +832,7 @@ function renderRows(){
         <div class="row-name">
           <span class="dot" style="background:${h.color}"></span>
           <b>${c.name}</b>
+          ${c.saindo ? `<span title="Cliente de saída">🚪</span>` : ''}
         </div>
         <div class="row-meta">${metricSummary}</div>
         <div style="display:flex;gap:6px;align-items:center;">
@@ -1006,7 +1010,7 @@ function renderDetail(){
 
   const trend = displayTrend(c);
   const trendPill = !trend ? '' : trend.dir==='stable'
-    ? `<span class="health-pill" style="color:var(--teal);background:var(--teal-bg);margin-left:6px;" title="Considerando a trajetória do cliente, não só o último mês">● Estável</span>`
+    ? `<span class="health-pill" style="color:var(--text-soft);background:var(--bg-soft);margin-left:6px;" title="Considerando a trajetória do cliente, não só o último mês">● Estável</span>`
     : trend.dir==='up'
     ? `<span class="health-pill" style="color:var(--green);background:var(--green-bg);margin-left:6px;" title="Considerando a trajetória do cliente, não só o último mês">▲ Crescimento ${Math.round(trend.pct)}%</span>`
     : `<span class="health-pill" style="color:var(--red);background:var(--red-bg);margin-left:6px;" title="Considerando a trajetória do cliente, não só o último mês">▼ Queda ${Math.round(Math.abs(trend.pct))}%</span>`;
@@ -1026,6 +1030,7 @@ function renderDetail(){
         <span class="health-pill clickable" id="termPill" style="color:${h.color};background:${h.bg}" title="Clique para ver o porquê do score">${h.label} · Termômetro ${term.total}</span>
         ${trendPill}
         ${semVenda ? `<span class="health-pill" style="color:var(--amber);background:var(--amber-bg);margin-left:6px;">Sem dado de venda</span>` : ''}
+        ${c.saindo ? `<span class="health-pill" style="color:#fff;background:var(--text-soft);margin-left:6px;" title="Encerramento por decisão interna do cliente, não por insatisfação com a agência">🚪 Cliente de saída</span>` : ''}
         <div class="invest-line"><strong>Investimento:</strong> ${c.invest}</div>
         <div class="invest-line" style="margin-top:2px;">
           <strong>Relação (manual):</strong> ${term.relacao} &nbsp;·&nbsp;

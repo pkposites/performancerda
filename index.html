@@ -129,6 +129,8 @@
   .detail-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:18px;}
   .detail-head h2{margin:0 0 4px;font-size:20px;font-weight:800;}
   .health-pill{font-size:11.5px;font-weight:700;padding:4px 11px;border-radius:999px;display:inline-block;}
+  .health-pill.clickable{cursor:pointer;}
+  .health-pill.clickable:hover{filter:brightness(0.95);}
   .invest-line{font-size:13px;color:var(--text-soft);margin-top:6px;}
 
   .metric-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px;}
@@ -270,11 +272,6 @@
         <p>Pra Cima Company · carteira RDA · Agosto → Setembro 2026</p>
       </div>
     </div>
-    <div class="tabs" id="tabs">
-      <button class="tab-btn active" data-view="clients">Clientes</button>
-      <button class="tab-btn" data-view="panorama">Panorama Geral</button>
-      <button class="tab-btn" data-view="produto">Ideias de Produto</button>
-    </div>
   </div>
 
   <div id="statStrip"></div>
@@ -311,38 +308,8 @@
     </div>
   </section>
 
-  <!-- PANORAMA -->
-  <section class="view" id="view-panorama">
-    <div id="metaInsightBanner"></div>
-
-    <div class="section-title">
-      <span class="icon-round" style="background:var(--red-bg);color:var(--red);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 2 20h20L12 3Z"/><path d="M12 10v4"/><path d="M12 17h.01"/></svg></span>
-      Gargalos gerais da carteira
-    </div>
-    <div class="card-grid" id="gargalosGrid"></div>
-
-    <div class="section-title">
-      <span class="icon-round" style="background:var(--green-bg);color:var(--green);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.6 10.8c.5.4.9 1 1 1.7L9.6 17h4.8l.2-1.5c.1-.7.5-1.3 1-1.7A6 6 0 0 0 12 3Z"/></svg></span>
-      Melhorias gerais propostas
-    </div>
-    <div class="card-grid" id="melhoriasGrid"></div>
-  </section>
-
-  <!-- PRODUTO -->
-  <section class="view" id="view-produto">
-    <div class="section-title">
-      <span class="icon-round" style="background:var(--violet-bg);color:var(--violet);"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 2 9 5-9 5-9-5 9-5Z"/><path d="m3 12 9 5 9-5"/><path d="m3 17 9 5 9-5"/></svg></span>
-      Ideias de produto para a agência
-    </div>
-    <div class="card-grid" id="produtoGrid" style="grid-template-columns:repeat(2,1fr);"></div>
-  </section>
-
   <div class="footer-bar">
     <div class="left">Dados de tráfego (Meta Ads) comparando Agosto (01-31) vs Setembro (01-27), atualizados em 28/09/2026 · Relação/gargalo em atualização para a reunião · RDA / Pra Cima Company</div>
-    <div class="nav-arrows">
-      <button class="nav-btn" id="prevBtn">← Anterior</button>
-      <button class="nav-btn" id="nextBtn">Próximo →</button>
-    </div>
   </div>
 
 </div>
@@ -639,31 +606,15 @@ function computeThermometer(client){
   };
 }
 
-const GARGALOS = [
-  {t:'Falta de dado de vendas/fechamento', d:'Quase toda a carteira reporta leads e mensagens, mas não o que virou venda — o gargalo mais citado da planilha inteira.'},
-  {t:'Baixo engajamento de parte da carteira', d:'RedeBr, Abuse e as duas contas We Pink estão afastadas ou ausentes, travando ajuste de campanha e criativo.'},
-  {t:'Falta de criativo atualizado', d:'Alguns contratos, como o da Abuse, pararam de enviar novos criativos para a operação.'},
-  {t:'Dependência de canal único', d:'A quase totalidade da carteira só anuncia no Meta, concentrando todo o risco em um canal.'},
-  {t:'Métrica sem padrão entre contas', d:'Cada cliente reporta um tipo de resultado diferente, o que é esperado — mas dificulta comparar e apresentar a carteira como um todo.'},
-];
-
-const MELHORIAS = [
-  {t:'Ficha padrão de report por cliente', d:'Investimento exato, KPI-norte, indício de conversão em venda, status de relacionamento e próximo passo — sempre no mesmo layout.'},
-  {t:'Ritual de captura de fechamento comercial', d:'Mesmo que manual/WhatsApp, para provar ROI de verdade e não só volume de leads.'},
-  {t:'Cadência de contato fixa', d:'Para os clientes distantes ou ausentes, cujo gargalo de comunicação já está afetando o resultado.'},
-  {t:'Upsell de Google Ads', d:'Nos clientes que hoje só usam Meta, como diversificação de canal e aumento de ticket médio.'},
-  {t:'Score objetivo de saúde do cliente ✅ implementado', d:'O rótulo livre "Médio/Bom/Ruim" foi substituído por um cálculo automático (presença, gargalo aberto, tendência ago→set e dado de venda) — visível em cada card de cliente.'},
-];
-
-const PRODUTOS = [
-  {tag:'Padronização', h:'Padronização já na criação do cliente', d:'Forçar ficha padrão (investimento, KPI-norte, canal de contato) desde a primeira reunião com o cliente, não depois — evita o retrabalho de descobrir isso tudo só quando o gargalo já apareceu.'},
-  {tag:'ControlaLead', h:'Módulo simples de funil comercial', d:'Um status de fechamento por lead dentro do ControlaLead (nosso CRM) resolveria de vez o gargalo nº 1 da carteira: hoje é o dado que mais falta e mais aparece como reclamação.'},
-  {tag:'Engajamento', h:'Checklist automático de contato', d:'Um alerta quando o cliente fica X dias sem responder ajudaria a agir antes do relacionamento virar gargalo — como já aconteceu com RedeBr e Abuse.'},
-  {tag:'Landing Pages', h:'LPs de conversão e link tree como produto', d:'Entrega fracionada e recorrente: landing page de conversão e página estilo link tree como produtos à parte, vendáveis pra carteira atual e pra novo cliente.'},
-  {tag:'Lead Hub', h:'Novo hub de captação e organização de leads', d:'Centralizar os leads gerados nas campanhas (hoje espalhados entre WhatsApp, formulário, grupo) num só lugar — ataca direto o gargalo de falta de dado de venda que aparece em quase toda a carteira.'},
-  {tag:'Consultoria', h:'Consultoria pontual como produto à parte', d:'Para clientes que precisam de direcionamento estratégico sem contratar a operação completa — abre outra porta de entrada e de receita.'},
-  {tag:'Upsell', h:'Precificação de produtos pontuais pra carteira atual', d:'Definir ticket médio pra cada produto pontual (LP, Lead Hub, consultoria) pensando em vender pros mesmos clientes que já pagam mensalidade — foco em caixa, não só em entregar mais operacional.'},
-];
+// Gargalo de comunicação: hoje é o maior gargalo da agência. Quando o
+// score de relação de um cliente cai por causa disso (presença fraca ou
+// gargalo que fala de contato/retorno), a ferramenta aponta isso de forma
+// explícita ao clicar no termômetro, em vez de deixar implícito no número.
+function communicationIssue(client){
+  if(client.presence==='ausente' || client.presence==='distante') return true;
+  const text = [client.gargalo, client.presenceNote].filter(Boolean).join(' ').toLowerCase();
+  return /comunica|contato|resposta|retorno|relação|parceria|atrito/.test(text);
+}
 
 // ------------------------------------------------------------------
 // RENDER
@@ -797,6 +748,10 @@ function renderRows(){
       ? `${mainMetric.label}: ${fmtNum(mainMetric.jul)}`
       : (c.note ? c.note.text : 'Sem atividade');
     const scoreBadge = `<span class="presence-tag" style="color:${h.color};background:${h.bg}" title="Termômetro (Relação ${term.relacao} · Tráfego ${term.trafego})">${term.total}</span>`;
+    const trend = metricTrend(c);
+    const trendBadge = trend===null ? '' : trend>=0
+      ? `<span class="presence-tag" style="color:var(--green);background:var(--green-bg);" title="Tendência de tráfego no período">▲ ${Math.round(trend)}%</span>`
+      : `<span class="presence-tag" style="color:var(--red);background:var(--red-bg);" title="Tendência de tráfego no período">▼ ${Math.round(Math.abs(trend))}%</span>`;
     return `
       <div class="row ${c.name===selectedName?'selected':''}" data-name="${c.name}">
         <div class="row-name">
@@ -805,6 +760,7 @@ function renderRows(){
         </div>
         <div class="row-meta">${metricSummary}</div>
         <div style="display:flex;gap:6px;align-items:center;">
+          ${trendBadge}
           ${scoreBadge}
           <span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span>
         </div>
@@ -942,11 +898,25 @@ function renderDetail(){
 
   const metaHtml = renderMetaCard(c.meta);
 
+  const trend = metricTrend(c);
+  const trendPill = trend===null ? '' : trend>=0
+    ? `<span class="health-pill" style="color:var(--green);background:var(--green-bg);margin-left:6px;">▲ Crescimento ${Math.round(trend)}%</span>`
+    : `<span class="health-pill" style="color:var(--red);background:var(--red-bg);margin-left:6px;">▼ Queda ${Math.round(Math.abs(trend))}%</span>`;
+
+  const commIssue = communicationIssue(c);
+  const commAlertHtml = commIssue
+    ? `<div class="info-card" id="commAlert" style="display:none;margin-bottom:16px;border-color:var(--red);background:var(--red-bg);">
+         <div class="eyebrow" style="color:var(--red);">${ICON.alert} Por que o score de relação está baixo</div>
+         <p>O que está puxando a nota deste cliente pra baixo aqui é <b>comunicação/presença</b> — hoje o maior gargalo da agência — e não o tráfego da campanha (que é calculado separado, só com dado da Meta).</p>
+       </div>`
+    : '';
+
   el.innerHTML = `
     <div class="detail-head">
       <div>
         <h2>${c.name}</h2>
-        <span class="health-pill" style="color:${h.color};background:${h.bg}">${h.label} · Termômetro ${term.total}</span>
+        <span class="health-pill clickable" id="termPill" style="color:${h.color};background:${h.bg}" title="Clique para ver o porquê do score">${h.label} · Termômetro ${term.total}</span>
+        ${trendPill}
         ${semVenda ? `<span class="health-pill" style="color:var(--amber);background:var(--amber-bg);margin-left:6px;">Sem dado de venda</span>` : ''}
         <div class="invest-line"><strong>Investimento:</strong> ${c.invest}</div>
         <div class="invest-line" style="margin-top:2px;">
@@ -956,6 +926,8 @@ function renderDetail(){
       </div>
       <span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span>
     </div>
+
+    ${commAlertHtml}
 
     ${metaHtml}
 
@@ -994,69 +966,14 @@ function renderDetail(){
     ta.value = '';
     renderDetail();
   });
+
+  const termPill = document.getElementById('termPill');
+  const commAlert = document.getElementById('commAlert');
+  if(termPill && commAlert) termPill.addEventListener('click', ()=>{
+    commAlert.style.display = commAlert.style.display==='none' ? 'block' : 'none';
+  });
 }
 
-function renderMetaInsight(){
-  const el = document.getElementById('metaInsightBanner');
-  const withRec = CLIENTS.filter(c=>c.meta && c.meta.topRec);
-  if(!withRec.length){ el.innerHTML=''; return; }
-  const counts = {};
-  withRec.forEach(c=>{ counts[c.meta.topRec] = (counts[c.meta.topRec]||0)+1; });
-  const [topLabel, topCount] = Object.entries(counts).sort((a,b)=>b[1]-a[1])[0];
-  el.innerHTML = `
-    <div class="meta-insight-banner">
-      <span class="icon-round" style="width:32px;height:32px;background:var(--blue-bg);color:var(--blue);flex-shrink:0;">${ICON.target}</span>
-      <div>
-        <h4>Recomendação mais recorrente do Meta na carteira</h4>
-        <p><b>${topLabel}</b> aparece como oportunidade em ${topCount} de ${withRec.length} contas com recomendações pendentes — um ajuste único que, se replicado, pode melhorar o Opportunity Score de boa parte da carteira de uma vez.</p>
-      </div>
-    </div>`;
-}
-
-function renderInsights(){
-  document.getElementById('gargalosGrid').innerHTML = GARGALOS.map((g,i)=>`
-    <div class="insight-card">
-      <div class="n num">${String(i+1).padStart(2,'0')}</div>
-      <h4>${g.t}</h4>
-      <p>${g.d}</p>
-    </div>`).join('');
-
-  document.getElementById('melhoriasGrid').innerHTML = MELHORIAS.map((m,i)=>`
-    <div class="insight-card">
-      <div class="n num">${String(i+1).padStart(2,'0')}</div>
-      <h4>${m.t}</h4>
-      <p>${m.d}</p>
-    </div>`).join('');
-
-  document.getElementById('produtoGrid').innerHTML = PRODUTOS.map(p=>`
-    <div class="product-card">
-      <span class="tag">${p.tag}</span>
-      <h4>${p.h}</h4>
-      <p>${p.d}</p>
-    </div>`).join('');
-}
-
-// ------------------------------------------------------------------
-// NAV
-// ------------------------------------------------------------------
-const VIEWS = ['clients','panorama','produto'];
-let viewIdx = 0;
-
-function setView(name){
-  viewIdx = VIEWS.indexOf(name);
-  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  document.getElementById('view-'+name).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===name));
-  document.getElementById('prevBtn').disabled = viewIdx===0;
-  document.getElementById('nextBtn').disabled = viewIdx===VIEWS.length-1;
-}
-
-document.getElementById('tabs').addEventListener('click', e=>{
-  const btn = e.target.closest('.tab-btn');
-  if(btn) setView(btn.dataset.view);
-});
-document.getElementById('prevBtn').addEventListener('click', ()=>{ if(viewIdx>0) setView(VIEWS[viewIdx-1]); });
-document.getElementById('nextBtn').addEventListener('click', ()=>{ if(viewIdx<VIEWS.length-1) setView(VIEWS[viewIdx+1]); });
 document.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; renderRows(); });
 document.getElementById('sortSelect').addEventListener('change', e=>{ sortMode = e.target.value; renderRows(); });
 document.getElementById('quedaTrafegoToggle').addEventListener('change', e=>{ onlyTrafficDrop = e.target.checked; renderRows(); });
@@ -1109,9 +1026,6 @@ selectedName = sortedFilteredClients()[0].name;
 statStrip();
 renderRows();
 renderDetail();
-renderInsights();
-renderMetaInsight();
-setView('clients');
 </script>
 </body>
 </html>

@@ -118,6 +118,20 @@
     background:var(--bg-soft);
   }
   .bucket-head:first-child{padding-top:12px;}
+
+  .summary-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .summary-table th{
+    text-align:left;padding:9px 16px;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
+    color:var(--text-faint);border-bottom:1px solid var(--border);white-space:nowrap;
+  }
+  .summary-table td{padding:9px 16px;border-bottom:1px solid var(--border);vertical-align:top;}
+  .summary-row{cursor:pointer;transition:background .15s ease;}
+  .summary-row:hover{background:var(--bg-soft);}
+  .summary-gargalo{color:var(--text-soft);line-height:1.4;max-width:420px;}
+  .summary-bucket-row{
+    padding:8px 16px 4px !important;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    background:var(--bg-soft);border-bottom:none !important;
+  }
   .row:hover{background:var(--bg-soft);}
   .row.selected{background:var(--green-bg);}
   .row.saindo{background:repeating-linear-gradient(135deg, var(--amber-bg) 0 10px, #fff 10px 20px);}
@@ -274,6 +288,18 @@
   <div id="statStrip"></div>
 
   <div id="gargaloGeralBanner"></div>
+
+  <!-- RESUMO EXECUTIVO -->
+  <div class="list-card" style="margin-bottom:18px;">
+    <div class="list-head" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
+      <div>
+        <h3>Resumo da carteira</h3>
+        <span>Visão de todos os clientes antes de entrar no detalhe de cada um</span>
+      </div>
+      <button id="toggleSummaryBtn" class="nav-btn" style="font-size:12px;padding:6px 12px;">Recolher</button>
+    </div>
+    <div id="summaryPanel" style="overflow-x:auto;"></div>
+  </div>
 
   <!-- CLIENTES -->
   <section class="view active" id="view-clients">
@@ -716,6 +742,54 @@ function avgThermometer(){
 // segue sendo o maior gargalo do dia a dia da agência, e a saída repentina
 // de alguns clientes neste fim de ano é leitura de mercado (fechamento de
 // ciclo + confusão generalizada com o movimento de IA), não falha nossa.
+let summaryCollapsed = false;
+
+// Resumo executivo: todos os clientes numa tabela só, agrupados pelo mesmo
+// bucket de saúde da lista — pra dar contexto completo antes de precisar
+// clicar em cada conta pra ver o detalhe.
+function renderSummaryPanel(){
+  const el = document.getElementById('summaryPanel');
+  if(summaryCollapsed){ el.innerHTML=''; return; }
+  const list = sortedFilteredClients();
+  let lastBucket = null;
+  const rows = list.map(c=>{
+    const term = computeThermometer(c);
+    const h = healthTier(term.total);
+    const p = PRESENCE[c.presence];
+    const trend = displayTrend(c);
+    const trendTxt = !trend ? '—' : trend.dir==='stable' ? '● Estável'
+      : trend.dir==='up' ? `▲ ${Math.round(trend.pct)}%` : `▼ ${Math.round(Math.abs(trend.pct))}%`;
+    const trendColor = !trend ? 'var(--text-faint)' : trend.dir==='stable' ? 'var(--text-soft)' : trend.dir==='up' ? 'var(--green)' : 'var(--red)';
+    const gargaloTxt = c.gargalo || c.gargaloNote || '—';
+    const bucket = healthBucket(c);
+    const bucketDef = HEALTH_BUCKETS.find(b=>b.key===bucket);
+    const bucketRow = bucket!==lastBucket
+      ? `<tr><td colspan="6" class="summary-bucket-row" style="color:${bucketDef.color};">${bucketDef.label} (${list.filter(x=>healthBucket(x)===bucket).length})</td></tr>`
+      : '';
+    lastBucket = bucket;
+    return `
+      ${bucketRow}
+      <tr class="summary-row" data-name="${c.name}">
+        <td><b>${c.name}</b>${c.saindo ? ` <span title="${c.saindoLabel||'Cliente de saída'}">🚪</span>` : ''}</td>
+        <td><span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span></td>
+        <td><span class="presence-tag" style="color:${h.color};background:${h.bg}">${term.total}</span></td>
+        <td style="color:${trendColor};font-weight:700;white-space:nowrap;">${trendTxt}</td>
+        <td class="summary-gargalo">${gargaloTxt}</td>
+      </tr>`;
+  }).join('');
+  el.innerHTML = `
+    <table class="summary-table">
+      <thead><tr><th>Cliente</th><th>Presença</th><th>Termômetro</th><th>Tendência</th><th>Gargalo / situação</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  el.querySelectorAll('.summary-row').forEach(r=>{
+    r.addEventListener('click', ()=>{
+      selectedName = r.dataset.name; renderRows(); renderDetail(); renderSummaryPanel();
+      document.getElementById('detail').scrollIntoView({behavior:'smooth', block:'start'});
+    });
+  });
+}
+
 function renderGargaloGeral(){
   const el = document.getElementById('gargaloGeralBanner');
   const saindo = CLIENTS.filter(c=>c.saindo);
@@ -1073,9 +1147,14 @@ function renderDetail(){
   });
 }
 
-document.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; renderRows(); });
-document.getElementById('sortSelect').addEventListener('change', e=>{ sortMode = e.target.value; renderRows(); });
-document.getElementById('quedaTrafegoToggle').addEventListener('change', e=>{ onlyTrafficDrop = e.target.checked; renderRows(); });
+document.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; renderRows(); renderSummaryPanel(); });
+document.getElementById('sortSelect').addEventListener('change', e=>{ sortMode = e.target.value; renderRows(); renderSummaryPanel(); });
+document.getElementById('quedaTrafegoToggle').addEventListener('change', e=>{ onlyTrafficDrop = e.target.checked; renderRows(); renderSummaryPanel(); });
+document.getElementById('toggleSummaryBtn').addEventListener('click', function(){
+  summaryCollapsed = !summaryCollapsed;
+  this.textContent = summaryCollapsed ? 'Expandir' : 'Recolher';
+  renderSummaryPanel();
+});
 
 // ------------------------------------------------------------------
 // INIT
@@ -1083,6 +1162,7 @@ document.getElementById('quedaTrafegoToggle').addEventListener('change', e=>{ on
 selectedName = sortedFilteredClients()[0].name;
 statStrip();
 renderGargaloGeral();
+renderSummaryPanel();
 renderRows();
 renderDetail();
 </script>

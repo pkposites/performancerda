@@ -286,8 +286,6 @@
 
   <div id="statStrip"></div>
 
-  <div id="gargaloGeralBanner"></div>
-
   <!-- RESUMO EXECUTIVO -->
   <div class="list-card" style="margin-bottom:18px;">
     <div class="list-head" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
@@ -758,6 +756,29 @@ function stackedBar(segments){
   return `<div class="summary-stack">${bars}</div><div class="summary-legend">${legend}</div>`;
 }
 
+// Categoriza o gargalo real de cada cliente a partir do texto já registrado
+// (o que foi falado na sabatina) — não é um campo novo, é leitura do que já
+// existe em client.gargalo. Clientes de saída entram em "mercado" mesmo sem
+// gargalo de texto, porque a causa ali é de contexto, não de relação.
+function classifyGargalo(client){
+  if(client.saindo) return 'mercado';
+  if(!client.gargalo) return null;
+  const t = client.gargalo.toLowerCase();
+  if(/direitos autorais|marca/.test(t)) return 'marca';
+  if(/comunicaç|interlocutor|comportamento/.test(t)) return 'comunicacao';
+  if(/comercial|precificaç|preço/.test(t)) return 'comercial';
+  if(/dado de vendas|desempenho\/vendas|vendas/.test(t)) return 'vendas';
+  return 'outro';
+}
+const GARGALO_CATEGORIAS = [
+  {key:'comunicacao', label:'Comunicação', color:'var(--red)'},
+  {key:'comercial', label:'Comercial do cliente', color:'var(--amber)'},
+  {key:'vendas', label:'Falta de dado de vendas', color:'var(--blue)'},
+  {key:'marca', label:'Marca / direitos autorais', color:'var(--pink)'},
+  {key:'mercado', label:'Mercado (fim de ano + IA)', color:'var(--violet)'},
+  {key:'outro', label:'Outro', color:'var(--text-faint)'},
+];
+
 function renderSummaryPanel(){
   const el = document.getElementById('summaryPanel');
   if(summaryCollapsed){ el.innerHTML=''; return; }
@@ -779,6 +800,12 @@ function renderSummaryPanel(){
     {label:'Sem dado', color:'var(--bg-soft)', n:trendCounts.sem},
   ];
 
+  const semGargalo = list.filter(c=>!classifyGargalo(c)).length;
+  const gargaloSegs = [
+    ...GARGALO_CATEGORIAS.map(g=>({label:g.label, color:g.color, n:list.filter(c=>classifyGargalo(c)===g.key).length})),
+    {label:'Sem gargalo ativo', color:'var(--green-bg)', n:semGargalo},
+  ];
+
   el.innerHTML = `
     <div class="summary-charts">
       <div class="summary-chart-col">
@@ -789,24 +816,20 @@ function renderSummaryPanel(){
         <div class="summary-chart-title">Tendência geral da carteira</div>
         ${stackedBar(trendSegs)}
       </div>
-    </div>`;
-}
-
-function renderGargaloGeral(){
-  const el = document.getElementById('gargaloGeralBanner');
-  const saindo = CLIENTS.filter(c=>c.saindo);
-  const saindoTxt = saindo.length
-    ? ` Neste momento, ${saindo.map(c=>`${c.name} (${(c.saindoLabel||'de saída').toLowerCase()})`).join(', ')} — leitura de mercado (fim de ano + confusão geral com o movimento de IA), não sinal de insatisfação com a agência.`
-    : '';
-  el.innerHTML = `
-    <div class="meta-insight-banner" style="border-color:rgba(217,154,31,.3);background:linear-gradient(135deg, var(--amber-bg) 0%, #fff 70%);margin-bottom:18px;">
-      <span class="icon-round" style="width:32px;height:32px;background:var(--amber-bg);color:var(--amber);flex-shrink:0;">${ICON.alert}</span>
-      <div>
-        <h4>Gargalo geral da carteira: comunicação</h4>
-        <p>Comunicação com os clientes continua sendo o maior gargalo do dia a dia da agência — é o que mais aparece puxando o score de Relação pra baixo em toda a carteira.${saindoTxt}</p>
+    </div>
+    <div class="summary-charts" style="grid-template-columns:1fr;border-top:1px solid var(--border);">
+      <div class="summary-chart-col">
+        <div class="summary-chart-title">Gargalos identificados na carteira</div>
+        ${stackedBar(gargaloSegs)}
+        <p style="font-size:12.5px;color:var(--text-soft);line-height:1.5;margin:10px 0 0;">
+          Comunicação continua sendo o maior gargalo do dia a dia da agência. Além disso, estamos num momento de mercado
+          complicado — fim de ano somado à percepção de que o movimento de IA torna profissionais desnecessários —
+          e isso tem afetado as relações de forma geral, já gerando saída de clientes independente de bons resultados.
+        </p>
       </div>
     </div>`;
 }
+
 
 function statStrip(){
   const total = CLIENTS.length;
@@ -1163,7 +1186,6 @@ document.getElementById('toggleSummaryBtn').addEventListener('click', function()
 // ------------------------------------------------------------------
 selectedName = sortedFilteredClients()[0].name;
 statStrip();
-renderGargaloGeral();
 renderSummaryPanel();
 renderRows();
 renderDetail();

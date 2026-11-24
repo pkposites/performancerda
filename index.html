@@ -272,11 +272,6 @@
 
   <div id="gargaloGeralBanner"></div>
 
-  <!-- CONTROLES -->
-  <div class="list-card" style="padding:16px 18px;margin-bottom:18px;display:flex;flex-wrap:wrap;gap:14px;align-items:center;justify-content:flex-end;">
-    <button id="generateAgendaBtn" class="nav-btn" style="background:var(--violet);color:#fff;">📋 Gerar pauta da próxima reunião</button>
-  </div>
-
   <!-- CLIENTES -->
   <section class="view active" id="view-clients">
     <div class="clients-grid">
@@ -1036,42 +1031,6 @@ function renderDetail(){
 document.getElementById('searchInput').addEventListener('input', e=>{ searchTerm = e.target.value; renderRows(); });
 document.getElementById('sortSelect').addEventListener('change', e=>{ sortMode = e.target.value; renderRows(); });
 document.getElementById('quedaTrafegoToggle').addEventListener('change', e=>{ onlyTrafficDrop = e.target.checked; renderRows(); });
-
-async function copyTextViaButton(text, btn){
-  const original = btn.textContent;
-  try{
-    if(navigator.clipboard && window.isSecureContext){
-      await navigator.clipboard.writeText(text);
-    } else {
-      const ta = document.createElement('textarea');
-      ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
-      document.body.appendChild(ta); ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-    }
-    btn.textContent = '✅ Copiado! Cole no chat com o Claude';
-  }catch(e){
-    btn.textContent = '⚠️ Não deu pra copiar — tenta de novo';
-  }
-  setTimeout(()=>{ btn.textContent = original; }, 3500);
-}
-
-// Pauta do próximo período: junta o "próximo passo" combinado de cada
-// cliente — automático a partir dos dados já preenchidos, sem digitar de novo.
-function buildAgendaText(){
-  const hoje = new Date().toLocaleDateString('pt-BR');
-  const linhas = CLIENTS.map(c=>`• ${c.name}\n  Combinado: ${c.proximo}`).join('\n\n');
-  return [
-    `Pauta da próxima reunião — Termômetro Pra Cima`,
-    `Gerada em: ${hoje}`,
-    ``,
-    linhas,
-  ].join('\n');
-}
-
-document.getElementById('generateAgendaBtn').addEventListener('click', function(){
-  copyTextViaButton(buildAgendaText(), this);
-});
 
 // ------------------------------------------------------------------
 // INIT

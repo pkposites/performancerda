@@ -10,11 +10,11 @@
 <style>
   :root{
     --bg:#eef1f7;
-    --bg-soft:#e6eaf3;
-    --card:#ffffff;
-    --border:rgba(31,36,55,0.07);
-    --shadow:0 6px 24px rgba(31,41,66,0.07);
-    --shadow-lift:0 10px 32px rgba(31,41,66,0.12);
+    --bg-soft:#eef0f8;
+    --card:#f8f8fd;
+    --border:rgba(31,36,55,0.08);
+    --shadow:0 14px 44px rgba(8,6,24,.45), 0 0 0 1px rgba(124,92,217,.10);
+    --shadow-lift:0 20px 56px rgba(8,6,24,.55), 0 0 0 1px rgba(124,92,217,.16);
     --text:#1c2130;
     --text-soft:#6b7185;
     --text-faint:#9aa0b4;
@@ -114,6 +114,11 @@
     transition:background .15s ease;
   }
   .row:last-child{border-bottom:none;}
+  .bucket-head{
+    padding:10px 18px 4px;font-size:11px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
+    background:var(--bg-soft);
+  }
+  .bucket-head:first-child{padding-top:12px;}
   .row:hover{background:var(--bg-soft);}
   .row.selected{background:var(--green-bg);}
   .row.saindo{background:repeating-linear-gradient(135deg, var(--amber-bg) 0 10px, #fff 10px 20px);}
@@ -805,8 +810,27 @@ function sortedFilteredClients(){
       return av-bv;
     });
   } else list = list.slice().sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
-  // Clientes de saída sempre por último, independente do modo de ordenação.
-  return list.slice().sort((a,b)=>(a.saindo?1:0)-(b.saindo?1:0));
+  // Agrupa por bucket de saúde (bem/atenção/crítico/saída) pra bater o olho
+  // rápido — a ordenação escolhida acima só decide a ordem dentro de cada
+  // grupo, não entre grupos.
+  const bucketOrder = {bem:0, atencao:1, critico:2, saida:3};
+  return list.slice().sort((a,b)=>bucketOrder[healthBucket(a)]-bucketOrder[healthBucket(b)]);
+}
+
+// Bucket visual pra "bater o olho": bem / atenção / crítico, com os
+// clientes de saída sempre num grupo próprio no fim, à parte do score.
+const HEALTH_BUCKETS = [
+  {key:'bem', label:'✅ Bem', color:'var(--green)'},
+  {key:'atencao', label:'⚠️ Atenção', color:'var(--amber)'},
+  {key:'critico', label:'🔴 Crítico', color:'var(--red)'},
+  {key:'saida', label:'🚪 Em encerramento', color:'var(--text-soft)'},
+];
+function healthBucket(client){
+  if(client.saindo) return 'saida';
+  const score = computeThermometer(client).total;
+  if(score>=75) return 'bem';
+  if(score>=40) return 'atencao';
+  return 'critico';
 }
 
 function renderRows(){
@@ -819,7 +843,14 @@ function renderRows(){
     wrap.innerHTML = `<div style="padding:24px 18px;color:var(--text-faint);font-size:13px;">${msg}</div>`;
     return;
   }
+  let lastBucket = null;
   wrap.innerHTML = list.map(c=>{
+    const bucket = healthBucket(c);
+    const bucketDef = HEALTH_BUCKETS.find(b=>b.key===bucket);
+    const bucketHeader = bucket!==lastBucket
+      ? `<div class="bucket-head" style="color:${bucketDef.color};">${bucketDef.label} <span class="num">(${list.filter(x=>healthBucket(x)===bucket).length})</span></div>`
+      : '';
+    lastBucket = bucket;
     const term = computeThermometer(c);
     const h = healthTier(term.total);
     const p = PRESENCE[c.presence];
@@ -835,6 +866,7 @@ function renderRows(){
       ? `<span class="presence-tag" style="color:var(--green);background:var(--green-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▲ ${Math.round(trend.pct)}%</span>`
       : `<span class="presence-tag" style="color:var(--red);background:var(--red-bg);" title="Tendência considerando a trajetória do cliente, não só o último mês">▼ ${Math.round(Math.abs(trend.pct))}%</span>`;
     return `
+      ${bucketHeader}
       <div class="row ${c.name===selectedName?'selected':''} ${c.saindo?'saindo':''}" data-name="${c.name}">
         <div class="row-name">
           <span class="dot" style="background:${h.color}"></span>

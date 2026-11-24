@@ -345,7 +345,7 @@ const PRESENCE = {
 // oficial de cada conta (0-100, escala da própria Meta — mede alinhamento com
 // boas práticas da plataforma, não é o "score de saúde" da conta com a agência).
 const CLIENTS = [
-  {name:'RedeBr', presence:'presente', delicado:true,
+  {name:'RedeBr', presence:'presente', delicado:true, bucketOverride:'bem',
     presenceNote:'Voltou a estar presente — fase boa de relação, fluindo bem melhor. Comportamento ainda é complicado às vezes, mas não mais no padrão "só aparece pra reclamar" de antes.',
     invest:'R$ 2.000 Google + R$ 6.000 Meta (média mensal)',
     metrics:[
@@ -827,6 +827,10 @@ const HEALTH_BUCKETS = [
 ];
 function healthBucket(client){
   if(client.saindo) return 'saida';
+  // Override manual: cliente historicamente problemático, mas não está na
+  // pior fase — teve aumento de resultado e de proximidade, então o bucket
+  // automático (puxado pra baixo pelo histórico) ficaria pessimista demais.
+  if(client.bucketOverride) return client.bucketOverride;
   const score = computeThermometer(client).total;
   if(score>=75) return 'bem';
   if(score>=40) return 'atencao';

@@ -119,19 +119,18 @@
   }
   .bucket-head:first-child{padding-top:12px;}
 
-  .summary-table{width:100%;border-collapse:collapse;font-size:12.5px;}
-  .summary-table th{
-    text-align:left;padding:9px 16px;font-size:10.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;
-    color:var(--text-faint);border-bottom:1px solid var(--border);white-space:nowrap;
+  .summary-charts{display:grid;grid-template-columns:1fr 1fr;gap:24px;padding:4px 18px 18px;}
+  @media (max-width:640px){.summary-charts{grid-template-columns:1fr;}}
+  .summary-chart-title{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;}
+  .summary-stack{
+    display:flex;width:100%;height:16px;border-radius:999px;overflow:hidden;
+    background:var(--bg-soft);margin-bottom:12px;
   }
-  .summary-table td{padding:9px 16px;border-bottom:1px solid var(--border);vertical-align:top;}
-  .summary-row{cursor:pointer;transition:background .15s ease;}
-  .summary-row:hover{background:var(--bg-soft);}
-  .summary-gargalo{color:var(--text-soft);line-height:1.4;max-width:420px;}
-  .summary-bucket-row{
-    padding:8px 16px 4px !important;font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;
-    background:var(--bg-soft);border-bottom:none !important;
-  }
+  .summary-stack > div{height:100%;}
+  .summary-legend{display:flex;flex-wrap:wrap;gap:10px 16px;}
+  .summary-legend-item{display:flex;align-items:center;gap:6px;font-size:12.5px;color:var(--text-soft);}
+  .summary-legend-item .dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+  .summary-legend-item b{color:var(--text);}
   .row:hover{background:var(--bg-soft);}
   .row.selected{background:var(--green-bg);}
   .row.saindo{background:repeating-linear-gradient(135deg, var(--amber-bg) 0 10px, #fff 10px 20px);}
@@ -294,7 +293,7 @@
     <div class="list-head" style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;">
       <div>
         <h3>Resumo da carteira</h3>
-        <span>Visão de todos os clientes antes de entrar no detalhe de cada um</span>
+        <span>Visão agregada da saúde da carteira — o detalhe de cada cliente está no card dele</span>
       </div>
       <button id="toggleSummaryBtn" class="nav-btn" style="font-size:12px;padding:6px 12px;">Recolher</button>
     </div>
@@ -744,50 +743,53 @@ function avgThermometer(){
 // ciclo + confusão generalizada com o movimento de IA), não falha nossa.
 let summaryCollapsed = false;
 
-// Resumo executivo: todos os clientes numa tabela só, agrupados pelo mesmo
-// bucket de saúde da lista — pra dar contexto completo antes de precisar
-// clicar em cada conta pra ver o detalhe.
+// Resumo executivo: visão agregada da saúde geral da carteira (gráfico),
+// não repete o dado individual de cada cliente — isso já está no card de
+// cada um. Só duas barras empilhadas: distribuição por bucket de saúde e
+// distribuição de tendência.
+function stackedBar(segments){
+  const total = segments.reduce((a,s)=>a+s.n,0) || 1;
+  const bars = segments.filter(s=>s.n>0).map(s=>
+    `<div style="width:${(s.n/total*100).toFixed(2)}%;background:${s.color};" title="${s.label}: ${s.n}"></div>`
+  ).join('');
+  const legend = segments.map(s=>
+    `<div class="summary-legend-item"><span class="dot" style="background:${s.color}"></span>${s.label} <b>${s.n}</b></div>`
+  ).join('');
+  return `<div class="summary-stack">${bars}</div><div class="summary-legend">${legend}</div>`;
+}
+
 function renderSummaryPanel(){
   const el = document.getElementById('summaryPanel');
   if(summaryCollapsed){ el.innerHTML=''; return; }
-  const list = sortedFilteredClients();
-  let lastBucket = null;
-  const rows = list.map(c=>{
-    const term = computeThermometer(c);
-    const h = healthTier(term.total);
-    const p = PRESENCE[c.presence];
-    const trend = displayTrend(c);
-    const trendTxt = !trend ? '—' : trend.dir==='stable' ? '● Estável'
-      : trend.dir==='up' ? `▲ ${Math.round(trend.pct)}%` : `▼ ${Math.round(Math.abs(trend.pct))}%`;
-    const trendColor = !trend ? 'var(--text-faint)' : trend.dir==='stable' ? 'var(--text-soft)' : trend.dir==='up' ? 'var(--green)' : 'var(--red)';
-    const gargaloTxt = c.gargalo || c.gargaloNote || '—';
-    const bucket = healthBucket(c);
-    const bucketDef = HEALTH_BUCKETS.find(b=>b.key===bucket);
-    const bucketRow = bucket!==lastBucket
-      ? `<tr><td colspan="6" class="summary-bucket-row" style="color:${bucketDef.color};">${bucketDef.label} (${list.filter(x=>healthBucket(x)===bucket).length})</td></tr>`
-      : '';
-    lastBucket = bucket;
-    return `
-      ${bucketRow}
-      <tr class="summary-row" data-name="${c.name}">
-        <td><b>${c.name}</b>${c.saindo ? ` <span title="${c.saindoLabel||'Cliente de saída'}">🚪</span>` : ''}</td>
-        <td><span class="presence-tag" style="color:${p.color};background:${p.bg}">${p.label}</span></td>
-        <td><span class="presence-tag" style="color:${h.color};background:${h.bg}">${term.total}</span></td>
-        <td style="color:${trendColor};font-weight:700;white-space:nowrap;">${trendTxt}</td>
-        <td class="summary-gargalo">${gargaloTxt}</td>
-      </tr>`;
-  }).join('');
-  el.innerHTML = `
-    <table class="summary-table">
-      <thead><tr><th>Cliente</th><th>Presença</th><th>Termômetro</th><th>Tendência</th><th>Gargalo / situação</th></tr></thead>
-      <tbody>${rows}</tbody>
-    </table>`;
-  el.querySelectorAll('.summary-row').forEach(r=>{
-    r.addEventListener('click', ()=>{
-      selectedName = r.dataset.name; renderRows(); renderDetail(); renderSummaryPanel();
-      document.getElementById('detail').scrollIntoView({behavior:'smooth', block:'start'});
-    });
+  const list = CLIENTS;
+
+  const healthSegs = HEALTH_BUCKETS.map(b=>({
+    label:b.label, color:b.color, n:list.filter(c=>healthBucket(c)===b.key).length,
+  }));
+
+  const trendCounts = {up:0, stable:0, down:0, sem:0};
+  list.forEach(c=>{
+    const t = displayTrend(c);
+    if(!t) trendCounts.sem++; else trendCounts[t.dir]++;
   });
+  const trendSegs = [
+    {label:'▲ Crescimento', color:'var(--green)', n:trendCounts.up},
+    {label:'● Estável', color:'var(--text-faint)', n:trendCounts.stable},
+    {label:'▼ Queda', color:'var(--red)', n:trendCounts.down},
+    {label:'Sem dado', color:'var(--bg-soft)', n:trendCounts.sem},
+  ];
+
+  el.innerHTML = `
+    <div class="summary-charts">
+      <div class="summary-chart-col">
+        <div class="summary-chart-title">Saúde geral da carteira</div>
+        ${stackedBar(healthSegs)}
+      </div>
+      <div class="summary-chart-col">
+        <div class="summary-chart-title">Tendência geral da carteira</div>
+        ${stackedBar(trendSegs)}
+      </div>
+    </div>`;
 }
 
 function renderGargaloGeral(){

@@ -479,6 +479,18 @@ const CLIENTS = [
     meta:{accountId:'1529265070956235', accountName:'Barra dois (pessoal)', business:null, score:81, topRec:'Aumentar orçamento de 5 campanhas', lift:10,
       correcao:'⚠️ Conta corrigida em 13/09/2026: a conta usada antes ("Grupo Barra 2" / 1515195049412961, praticamente sem atividade real) estava errada. A conta certa é esta — campanhas ativas por modelo de veículo, otimizando para mensagens no WhatsApp.'}},
 
+  {name:'Excalibur Festas', presence:'ausente', saindo:true, saindoLabel:'Cliente que saiu',
+    presenceNote:'Cliente que já saiu da carteira — mantido aqui só como histórico/referência.',
+    invest:'Meta (não anuncia no Google)',
+    metrics:[
+      {label:'Leads (Meta Ads)', ago:0, jun:2, jul:23, cost:39.20},
+    ],
+    gargalo:null,
+    gargaloNote:'Não se aplica mais — cliente já encerrou com a agência.',
+    oportunidade:null,
+    proximo:'Nenhum — cliente já saiu da carteira.',
+    meta:{accountId:'24221553674153355', accountName:'Excalibur Festas', business:'DaBoutique', score:100, topRec:null, lift:0}},
+
   {name:'Horto', presence:'retomando', delicado:true,
     presenceNote:'Cliente que tinha saído e está voltando agora — ainda em fase de reajuste. Perderam o Ramon (responsável comercial de antes) e estão sem esse entendimento comercial hoje.',
     invest:'R$ 700 Meta + R$ 650 Google',
@@ -704,7 +716,7 @@ function renderGargaloGeral(){
   const el = document.getElementById('gargaloGeralBanner');
   const saindo = CLIENTS.filter(c=>c.saindo);
   const saindoTxt = saindo.length
-    ? ` Neste momento, ${saindo.length} cliente${saindo.length>1?'s':''} (${saindo.map(c=>c.name).join(', ')}) está${saindo.length>1?'ão':''} de saída — leitura de mercado (fim de ano + confusão geral com o movimento de IA), não sinal de insatisfação com a agência.`
+    ? ` Neste momento, ${saindo.map(c=>`${c.name} (${(c.saindoLabel||'de saída').toLowerCase()})`).join(', ')} — leitura de mercado (fim de ano + confusão geral com o movimento de IA), não sinal de insatisfação com a agência.`
     : '';
   el.innerHTML = `
     <div class="meta-insight-banner" style="border-color:rgba(217,154,31,.3);background:linear-gradient(135deg, var(--amber-bg) 0%, #fff 70%);margin-bottom:18px;">
@@ -827,7 +839,7 @@ function renderRows(){
         <div class="row-name">
           <span class="dot" style="background:${h.color}"></span>
           <b>${c.name}</b>
-          ${c.saindo ? `<span title="Cliente de saída">🚪</span>` : ''}
+          ${c.saindo ? `<span title="${c.saindoLabel || 'Cliente de saída'}">🚪</span>` : ''}
         </div>
         <div class="row-meta">${metricSummary}</div>
         <div style="display:flex;gap:6px;align-items:center;">
@@ -980,7 +992,7 @@ function renderDetail(){
         <span class="health-pill clickable" id="termPill" style="color:${h.color};background:${h.bg}" title="Clique para ver o porquê do score">${h.label} · Termômetro ${term.total}</span>
         ${trendPill}
         ${semVenda ? `<span class="health-pill" style="color:var(--amber);background:var(--amber-bg);margin-left:6px;">Sem dado de venda</span>` : ''}
-        ${c.saindo ? `<span class="health-pill" style="color:#fff;background:var(--text-soft);margin-left:6px;" title="Encerramento por decisão interna do cliente, não por insatisfação com a agência">🚪 Cliente de saída</span>` : ''}
+        ${c.saindo ? `<span class="health-pill" style="color:#fff;background:var(--text-soft);margin-left:6px;">🚪 ${c.saindoLabel || 'Cliente de saída'}</span>` : ''}
         <div class="invest-line"><strong>Investimento:</strong> ${c.invest}</div>
         <div class="invest-line" style="margin-top:2px;">
           <strong>Relação (manual):</strong> ${term.relacao} &nbsp;·&nbsp;
